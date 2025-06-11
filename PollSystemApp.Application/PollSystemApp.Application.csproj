@@ -6,4 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\Dto\" />
+    <Folder Include="UseCases\Auth\" />
+    <Folder Include="UseCases\Users\" />
+    <Folder Include="UseCases\Polls\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PollSystemApp.Domain\PollSystemApp.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
