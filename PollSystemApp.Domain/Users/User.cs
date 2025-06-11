@@ -14,5 +14,8 @@ public class User: IdentityUser<Guid>
 
     public bool IasActive { get; set; }
 
-    
+    public string? RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiryTime { get; set; }
+
+
 }
