@@ -5,7 +5,7 @@ using PollSystemApp.Application.Common.Responses;
 namespace PollSystemApp.Api.Controllers
 {
     [ApiController]
-   
+    [Route("api/[controller]")]
     public abstract class ApiControllerBase : ControllerBase
     {
         protected IActionResult ProcessError(ApiBaseResponse response)
