@@ -9,11 +9,13 @@
   <ItemGroup>
     <Folder Include="UseCases\Auth\" />
     <Folder Include="UseCases\Users\" />
-    <Folder Include="UseCases\Polls\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
   </ItemGroup>
 
   <ItemGroup>
