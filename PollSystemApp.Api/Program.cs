@@ -1,8 +1,9 @@
 using PollSystemApp.Infrastructure;
-
+using PollSystemApp.Application;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplicationServices();
 // Add services to the container.
 
 builder.Services.AddControllers();

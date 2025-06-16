@@ -12,7 +12,7 @@ public class User: IdentityUser<Guid>
 {
     public DateTime CreatedAt { get; set; }
 
-    public bool IasActive { get; set; }
+    public bool IsActive { get; set; }
 
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpiryTime { get; set; }
