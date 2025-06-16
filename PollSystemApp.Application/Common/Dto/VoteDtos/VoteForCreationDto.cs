@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic; 
 
 namespace PollSystemApp.Application.Common.Dto.VoteDtos
 {
-    internal class VoteForCreationDto
+    public class VoteForCreationDto 
     {
+        public Guid PollId { get; set; }
+        public List<Guid> OptionIds { get; set; } = new List<Guid>();
     }
 }

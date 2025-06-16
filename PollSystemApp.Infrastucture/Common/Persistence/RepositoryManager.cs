@@ -15,7 +15,7 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
         private readonly Lazy<IOptionRepository> _optionRepository;
         private readonly Lazy<IOptionVoteSummaryRepository> _optionVoteSummaryRepository;
         private readonly Lazy<IPollRepository> _pollRepository;
-        private readonly Lazy<IPollResultRepostory> _pollResultRepository;
+        private readonly Lazy<IPollResultRepository> _pollResultRepository;
         private readonly Lazy<ITagRepository> _tagRepository;
         private readonly Lazy<IVoteRepository> _voteRepository;
 
@@ -23,7 +23,7 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
         public IOptionRepository Options => _optionRepository.Value;
         public IOptionVoteSummaryRepository OptionVoteSummaries => _optionVoteSummaryRepository.Value;
         public IPollRepository Polls => _pollRepository.Value;
-        public IPollResultRepostory PollResults => _pollResultRepository.Value;
+        public IPollResultRepository PollResults => _pollResultRepository.Value;
         public ITagRepository Tags => _tagRepository.Value;
         public IVoteRepository Votes => _voteRepository.Value;
 
@@ -35,7 +35,7 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
             _optionRepository = new Lazy<IOptionRepository>(() => new OptionRepository(_dbContext));
             _optionVoteSummaryRepository = new Lazy<IOptionVoteSummaryRepository>(() => new OptionVoteSummaryRepository( _dbContext));
             _pollRepository = new Lazy<IPollRepository>(() => new PollRepository( _dbContext));
-            _pollResultRepository = new Lazy<IPollResultRepostory>(() => new PollResultRepository( _dbContext));
+            _pollResultRepository = new Lazy<IPollResultRepository>(() => new PollResultRepository( _dbContext));
             _tagRepository = new Lazy<ITagRepository>(() => new TagRepository( _dbContext));
             _voteRepository = new Lazy<IVoteRepository>(() => new VoteRepository( _dbContext));
             

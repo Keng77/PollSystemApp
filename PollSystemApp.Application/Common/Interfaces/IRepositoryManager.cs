@@ -12,7 +12,7 @@ namespace PollSystemApp.Application.Common.Interfaces
         IOptionRepository Options { get; }
         IOptionVoteSummaryRepository OptionVoteSummaries { get; }
         IPollRepository Polls { get; }
-        IPollResultRepostory PollResults { get; }
+        IPollResultRepository PollResults { get; }
         ITagRepository Tags { get; }
         IVoteRepository Votes { get; }
 
