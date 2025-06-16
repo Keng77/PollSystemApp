@@ -1,19 +1,21 @@
 ﻿using AutoMapper;
 using MediatR;
-using PollSystemApp.Application.Common.Dto.OptionDtos; 
-using PollSystemApp.Application.Common.Dto.PollDtos;   
-using PollSystemApp.Application.Common.Interfaces;    
-using PollSystemApp.Domain.Polls; 
-using Microsoft.EntityFrameworkCore; 
+using PollSystemApp.Application.Common.Dto.OptionDtos;
+using PollSystemApp.Application.Common.Dto.PollDtos;
+using PollSystemApp.Application.Common.Interfaces;
+using PollSystemApp.Application.Common.Responses; 
+using PollSystemApp.Domain.Common.Exceptions;    
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic; 
+using System.Collections.Generic;
+using PollSystemApp.Domain.Polls;
 
 namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollById
 {
-    public class GetPollByIdQueryHandler : IRequestHandler<GetPollByIdQuery, PollDto?>
+    public class GetPollByIdQueryHandler : IRequestHandler<GetPollByIdQuery, ApiBaseResponse>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
@@ -24,18 +26,12 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollById
             _mapper = mapper;
         }
 
-        public async Task<PollDto?> Handle(GetPollByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ApiBaseResponse> Handle(GetPollByIdQuery request, CancellationToken cancellationToken)
         {
             var poll = await _repositoryManager.Polls
                                 .FindByCondition(p => p.Id == request.Id, trackChanges: false)
-                                .Include(p => p.Tags) 
-                                .FirstOrDefaultAsync(cancellationToken);
-
-            if (poll == null)
-            {
-                return null;
-            }
-
+                                .Include(p => p.Tags)
+                                .FirstOrDefaultAsync(cancellationToken) ?? throw new NotFoundException(nameof(Poll), request.Id);
             var pollDto = _mapper.Map<PollDto>(poll);
 
             var options = await _repositoryManager.Options
@@ -45,7 +41,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollById
 
             pollDto.Options = _mapper.Map<List<OptionDto>>(options);
 
-            return pollDto;
+            return new ApiOkResponse<PollDto>(pollDto);
         }
     }
 }

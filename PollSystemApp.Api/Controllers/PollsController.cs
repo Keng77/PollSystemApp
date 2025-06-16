@@ -1,54 +1,44 @@
-﻿using MediatR; 
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll; 
-using PollSystemApp.Application.UseCases.Polls.Queries.GetPollById;   
-using PollSystemApp.Application.Common.Dto.PollDtos;                  
+using PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll;
+using PollSystemApp.Application.UseCases.Polls.Queries.GetPollById;
+using PollSystemApp.Application.Common.Dto.PollDtos;
+using PollSystemApp.Application.Common.Responses;
+using PollSystemApp.Api.Extensions; 
 using System;
 using System.Threading.Tasks;
-//using Microsoft.AspNetCore.Authorization;
 
 namespace PollSystemApp.Api.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PollsController : ControllerBase
+    public class PollsController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
-        public PollsController(IMediator mediator) 
+        public PollsController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpPost]
-        // [Authorize(Roles = "Admin,User")] 
         public async Task<IActionResult> CreatePoll([FromBody] CreatePollCommand command)
         {
-            var pollId = await _mediator.Send(command);
+            var response = await _mediator.Send(command);
 
-            var createdPoll = await _mediator.Send(new GetPollByIdQuery { Id = pollId });
-            if (createdPoll == null)
-            {
-                return NotFound();
-            }
+            var pollId = response.GetResult<Guid>(); 
 
-            return CreatedAtAction(nameof(GetPollById), new { id = pollId }, createdPoll);
+            var getPollQuery = new GetPollByIdQuery { Id = pollId };
+            var createdPollResponse = await _mediator.Send(getPollQuery);
+
+            return CreatedAtAction(nameof(GetPollById), new { id = pollId }, createdPollResponse.GetResult<PollDto>());
         }
 
         [HttpGet("{id:guid}")]
-        // [Authorize]
         public async Task<IActionResult> GetPollById(Guid id)
         {
             var query = new GetPollByIdQuery { Id = id };
-            var pollDto = await _mediator.Send(query);
+            var response = await _mediator.Send(query); 
 
-            if (pollDto == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(pollDto);
+            return Ok(response.GetResult<PollDto>());
         }
-
     }
 }
