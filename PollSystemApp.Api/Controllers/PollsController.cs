@@ -7,9 +7,12 @@ using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Api.Extensions; 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PollSystemApp.Api.Controllers
 {
+    [Authorize]
+    [ApiController]
     public class PollsController : ApiControllerBase
     {
         private readonly IMediator _mediator;
@@ -19,6 +22,7 @@ namespace PollSystemApp.Api.Controllers
             _mediator = mediator;
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPost]
         public async Task<IActionResult> CreatePoll([FromBody] CreatePollCommand command)
         {

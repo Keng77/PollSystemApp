@@ -16,23 +16,28 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
-        // private readonly ICurrentUserService _currentUserService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CreatePollCommandHandler(IRepositoryManager repositoryManager, IMapper mapper /*, ICurrentUserService currentUserService */)
+        public CreatePollCommandHandler(IRepositoryManager repositoryManager, IMapper mapper , ICurrentUserService currentUserService)
         {
             _repositoryManager = repositoryManager;
             _mapper = mapper;
-            // _currentUserService = currentUserService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<ApiBaseResponse> Handle(CreatePollCommand request, CancellationToken cancellationToken)
         {
-            var placeholderUserId = new Guid("11111112-49b6-410c-bc78-2d54a9991870"); // Заглушка
+            var userId = _currentUserService.UserId;
+
+            if (!userId.HasValue) 
+            { 
+                throw new ForbiddenAccessException("User is not authenticated or user ID could not be determined.");
+            }
 
             var poll = _mapper.Map<Poll>(request);
             poll.Id = Guid.NewGuid();
             poll.CreatedAt = DateTime.UtcNow;
-            poll.CreatedBy = placeholderUserId;
+            poll.CreatedBy = userId.Value;
 
             if (request.Tags != null && request.Tags.Count != 0)
             {
@@ -70,9 +75,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll
                throw new BadRequestException("A poll must have at least one option.");
             }
 
-
             await _repositoryManager.CommitAsync(cancellationToken);
-
             return new ApiOkResponse<Guid>(poll.Id);
         }
     }

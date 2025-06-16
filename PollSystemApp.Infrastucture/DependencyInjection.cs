@@ -1,9 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using PollSystemApp.Application.Common.Interfaces;
+using PollSystemApp.Application.Common.Interfaces.Authentication;
+using PollSystemApp.Application.Common.Settings;
 using PollSystemApp.Domain.Users;
+using PollSystemApp.Infrastructure.Authentication;
 using PollSystemApp.Infrastructure.Common.Persistence;
+using PollSystemApp.Infrastructure.Services;
+using System.Text;
+
 
 
 namespace PollSystemApp.Infrastructure
@@ -12,12 +21,19 @@ namespace PollSystemApp.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+
             services
               .AddHttpContextAccessor()
-              .AddAuthorization()
+              .AddPersistence(configuration)
               .AddConfigIdentity()
-              .AddPersistence(configuration);
+              .AddJwtAuthentication(configuration);
 
+            services.AddAuthorization();
+            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IRepositoryManager, RepositoryManager>();
             return services;
         }
 
@@ -51,6 +67,47 @@ namespace PollSystemApp.Infrastructure
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+
+            return services;
+        }
+
+        private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            
+            var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
+
+            if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.Secret))
+            {
+               throw new InvalidOperationException("JWT Secret is not configured. Please check your configuration (appsettings.json, user secrets, environment variables).");
+            }
+
+           
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; 
+            })
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false; 
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+
+                    ValidateLifetime = true,
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
 
             return services;
         }
