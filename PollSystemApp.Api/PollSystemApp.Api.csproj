@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\PollSystemApp.Application\PollSystemApp.Application.csproj" />
     <ProjectReference Include="..\PollSystemApp.Infrastucture\PollSystemApp.Infrastructure.csproj" />
   </ItemGroup>
