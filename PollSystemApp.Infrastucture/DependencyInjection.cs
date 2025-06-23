@@ -30,10 +30,12 @@ namespace PollSystemApp.Infrastructure
               .AddJwtAuthentication(configuration);
 
             services.AddAuthorization();
-            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
+            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IRepositoryManager, RepositoryManager>();
+            services.AddSingleton<ITokenValidator, TokenValidator>();
+
             return services;
         }
 

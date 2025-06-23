@@ -16,9 +16,10 @@ namespace PollSystemApp.Application.Common.Mappings
         {
             
             CreateMap<OptionForCreationDto, Option>();
+            CreateMap<OptionForUpdateDto, Option>();
             CreateMap<Option, OptionDto>();
+           
 
-            
             CreateMap<PollForCreationDto, Poll>()
                 .ForMember(dest => dest.Tags, opt => opt.Ignore());
             CreateMap<PollForUpdateDto, Poll>();

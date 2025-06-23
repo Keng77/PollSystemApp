@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,13 +22,14 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
         public DbSet<Vote> Votes { get; set; }
         public DbSet<OptionVoteSummary> OptionVoteSummaries { get; set; }
         public DbSet<PollResult> PollResults { get; set; }
+        public DbSet<Tag> Tags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfiguration(new RoleConfiguration());
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            base.OnModelCreating(modelBuilder);            
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
+        
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

@@ -139,11 +139,14 @@ namespace PollSystemApp.Infrastructure.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Options");
+                    b.HasIndex("PollId");
+
+                    b.ToTable("Options", (string)null);
                 });
 
             modelBuilder.Entity("PollSystemApp.Domain.Polls.OptionVoteSummary", b =>
@@ -166,9 +169,11 @@ namespace PollSystemApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OptionId");
+
                     b.HasIndex("PollResultId");
 
-                    b.ToTable("OptionVoteSummaries");
+                    b.ToTable("OptionVoteSummaries", (string)null);
                 });
 
             modelBuilder.Entity("PollSystemApp.Domain.Polls.Poll", b =>
@@ -184,7 +189,8 @@ namespace PollSystemApp.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -200,11 +206,12 @@ namespace PollSystemApp.Infrastructure.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Polls");
+                    b.ToTable("Polls", (string)null);
                 });
 
             modelBuilder.Entity("PollSystemApp.Domain.Polls.PollResult", b =>
@@ -224,7 +231,9 @@ namespace PollSystemApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PollResults");
+                    b.HasIndex("PollId");
+
+                    b.ToTable("PollResults", (string)null);
                 });
 
             modelBuilder.Entity("PollSystemApp.Domain.Polls.Tag", b =>
@@ -235,16 +244,15 @@ namespace PollSystemApp.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("PollId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PollId");
+                    b.HasIndex("Name")
+                        .IsUnique();
 
-                    b.ToTable("Tag");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("PollSystemApp.Domain.Polls.Vote", b =>
@@ -271,7 +279,13 @@ namespace PollSystemApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Votes");
+                    b.HasIndex("OptionId");
+
+                    b.HasIndex("PollId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Votes", (string)null);
                 });
 
             modelBuilder.Entity("PollSystemApp.Domain.Users.Role", b =>
@@ -339,7 +353,7 @@ namespace PollSystemApp.Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IasActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
@@ -399,6 +413,21 @@ namespace PollSystemApp.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("PollTag", b =>
+                {
+                    b.Property<Guid>("PollId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PollId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("PollTags", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("PollSystemApp.Domain.Users.Role", null)
@@ -450,23 +479,74 @@ namespace PollSystemApp.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PollSystemApp.Domain.Polls.OptionVoteSummary", b =>
-                {
-                    b.HasOne("PollSystemApp.Domain.Polls.PollResult", null)
-                        .WithMany("Options")
-                        .HasForeignKey("PollResultId");
-                });
-
-            modelBuilder.Entity("PollSystemApp.Domain.Polls.Tag", b =>
+            modelBuilder.Entity("PollSystemApp.Domain.Polls.Option", b =>
                 {
                     b.HasOne("PollSystemApp.Domain.Polls.Poll", null)
-                        .WithMany("Tags")
-                        .HasForeignKey("PollId");
+                        .WithMany()
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("PollSystemApp.Domain.Polls.Poll", b =>
+            modelBuilder.Entity("PollSystemApp.Domain.Polls.OptionVoteSummary", b =>
                 {
-                    b.Navigation("Tags");
+                    b.HasOne("PollSystemApp.Domain.Polls.Option", null)
+                        .WithMany()
+                        .HasForeignKey("OptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PollSystemApp.Domain.Polls.PollResult", "PollResult")
+                        .WithMany("Options")
+                        .HasForeignKey("PollResultId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("PollResult");
+                });
+
+            modelBuilder.Entity("PollSystemApp.Domain.Polls.PollResult", b =>
+                {
+                    b.HasOne("PollSystemApp.Domain.Polls.Poll", null)
+                        .WithMany()
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PollSystemApp.Domain.Polls.Vote", b =>
+                {
+                    b.HasOne("PollSystemApp.Domain.Polls.Option", null)
+                        .WithMany()
+                        .HasForeignKey("OptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PollSystemApp.Domain.Polls.Poll", null)
+                        .WithMany()
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PollSystemApp.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PollTag", b =>
+                {
+                    b.HasOne("PollSystemApp.Domain.Polls.Poll", null)
+                        .WithMany()
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PollSystemApp.Domain.Polls.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PollSystemApp.Domain.Polls.PollResult", b =>
