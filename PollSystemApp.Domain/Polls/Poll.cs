@@ -23,7 +23,7 @@ namespace PollSystemApp.Domain.Polls
 
         public DateTime CreatedAt { get; set; }
 
-        public List<Tag>? Tags { get; set; }
+        public List<Tag> Tags { get; set; } = [];
 
     }
 }

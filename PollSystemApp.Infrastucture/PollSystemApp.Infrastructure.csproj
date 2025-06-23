@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Polls\Persistence\Configuration\**" />
+    <EmbeddedResource Remove="Polls\Persistence\Configuration\**" />
+    <None Remove="Polls\Persistence\Configuration\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.17" />
@@ -23,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Polls\Persistence\Configuration\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>
