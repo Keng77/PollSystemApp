@@ -4,17 +4,25 @@ using Microsoft.AspNetCore.Mvc;
 using PollSystemApp.Api.Extensions;
 using PollSystemApp.Application.Common.Dto.OptionDtos;
 using PollSystemApp.Application.Common.Dto.PollDtos;
+using PollSystemApp.Application.Common.Dto.PollResultDtos;
+using PollSystemApp.Application.Common.Dto.VoteDtos;
+using PollSystemApp.Application.Common.Pagination;
 using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Application.UseCases.Polls.Commands.AddOptionToPoll;
 using PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll;
 using PollSystemApp.Application.UseCases.Polls.Commands.DeletePoll;
 using PollSystemApp.Application.UseCases.Polls.Commands.DeletePollOption;
+using PollSystemApp.Application.UseCases.Polls.Commands.EndPollEarly;
 using PollSystemApp.Application.UseCases.Polls.Commands.UpdatePoll;
 using PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetPollById;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetPollOptionById;
+using PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults;
+using PollSystemApp.Application.UseCases.Votes.Commands.CreateVote;
+using PollSystemApp.Application.UseCases.Votes.Queries.CheckUserVote;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PollSystemApp.Api.Controllers
@@ -57,7 +65,9 @@ namespace PollSystemApp.Api.Controllers
         public async Task<IActionResult> GetAllPolls([FromQuery] GetAllPollsQuery query) 
         {
             var response = await _mediator.Send(query);
-            return Ok(response.GetResult<List<PollDto>>());
+            var (items, metaData) = response.GetResult<(List<PollDto> Items, PaginationMetadata MetaData)>();
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+            return Ok(items); 
         }
 
         [HttpPut("{id:guid}")]
@@ -131,6 +141,63 @@ namespace PollSystemApp.Api.Controllers
             await _mediator.Send(command);
             return NoContent();
         }
+
+        [HttpPost("{pollId:guid}/vote")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> CastVote(Guid pollId, [FromBody] CreateVoteRequestDto requestBody)
+        {
+            var command = new CreateVoteCommand
+            {
+                PollId = pollId,
+                OptionIds = requestBody.OptionIds
+            };
+            await _mediator.Send(command);
+            return Ok(); 
+        }
+
+        [HttpGet("{pollId:guid}/vote-status")]
+        [Authorize]
+        [ProducesResponseType(typeof(UserVoteStatusDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CheckUserVoteStatus(Guid pollId)
+        {
+            var query = new CheckUserVoteQuery { PollId = pollId };
+            var response = await _mediator.Send(query);
+            return Ok(response.GetResult<UserVoteStatusDto>());
+        }
+
+        [HttpPost("{pollId:guid}/end-early")]
+        [Authorize(Roles = "Admin")] 
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> EndPollEarly(Guid pollId)
+        {
+            var command = new EndPollEarlyCommand(pollId);
+            await _mediator.Send(command);
+            return Ok();
+        }
+
+        [HttpGet("{pollId:guid}/results")]
+        [ProducesResponseType(typeof(PollResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetPollResults(Guid pollId)
+        {
+            var query = new GetPollResultsQuery { PollId = pollId };
+            var response = await _mediator.Send(query);
+            return Ok(response.GetResult<PollResultDto>());
+        }
+
 
     }
 }
