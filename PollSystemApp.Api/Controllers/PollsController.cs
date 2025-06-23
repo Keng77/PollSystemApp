@@ -15,6 +15,7 @@ using PollSystemApp.Application.UseCases.Polls.Commands.DeletePollOption;
 using PollSystemApp.Application.UseCases.Polls.Commands.EndPollEarly;
 using PollSystemApp.Application.UseCases.Polls.Commands.UpdatePoll;
 using PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption;
+using PollSystemApp.Application.UseCases.Polls.Queries.ExportPollResultsToCsv;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetPollById;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetPollOptionById;
@@ -198,6 +199,21 @@ namespace PollSystemApp.Api.Controllers
             return Ok(response.GetResult<PollResultDto>());
         }
 
+        [HttpGet("{pollId:guid}/results/export-csv")]
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ExportPollResultsToCsv(Guid pollId)
+        {
+            var query = new ExportPollResultsToCsvQuery { PollId = pollId };
+            var exportData = await _mediator.Send(query); 
 
+            if (exportData == null || exportData.FileContents == null || exportData.FileContents.Length == 0)
+            {
+                return NotFound(new ProblemDetails { Title = "No data to export or error generating CSV." });
+            }
+
+            return File(exportData.FileContents, exportData.ContentType, exportData.FileName);
+        }
     }
 }
