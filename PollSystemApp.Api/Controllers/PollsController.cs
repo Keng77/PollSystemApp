@@ -1,14 +1,19 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PollSystemApp.Api.Extensions; 
+using PollSystemApp.Api.Extensions;
+using PollSystemApp.Application.Common.Dto.OptionDtos;
 using PollSystemApp.Application.Common.Dto.PollDtos;
 using PollSystemApp.Application.Common.Responses;
+using PollSystemApp.Application.UseCases.Polls.Commands.AddOptionToPoll;
 using PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll;
 using PollSystemApp.Application.UseCases.Polls.Commands.DeletePoll;
+using PollSystemApp.Application.UseCases.Polls.Commands.DeletePollOption;
 using PollSystemApp.Application.UseCases.Polls.Commands.UpdatePoll;
+using PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetPollById;
+using PollSystemApp.Application.UseCases.Polls.Queries.GetPollOptionById;
 using System;
 using System.Threading.Tasks;
 
@@ -72,5 +77,60 @@ namespace PollSystemApp.Api.Controllers
             await _mediator.Send(command); 
             return NoContent();
         }
+
+        [HttpPost("{pollId:guid}/options")]
+        [Authorize(Roles = "Admin,User")] 
+        [ProducesResponseType(typeof(OptionDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> AddOptionToPoll(Guid pollId, [FromBody] OptionForCreationDto optionData)
+        {
+            var command = new AddOptionToPollCommand { PollId = pollId, OptionData = optionData };
+            var response = await _mediator.Send(command);
+
+            var createdOption = response.GetResult<OptionDto>();
+
+            return CreatedAtAction(nameof(GetPollOptionById),
+                                   new { pollId = pollId, optionId = createdOption.Id },
+                                   createdOption);
+        }
+
+        [HttpGet("{pollId:guid}/options/{optionId:guid}", Name = "GetPollOptionById")]
+        [Authorize]
+        [ProducesResponseType(typeof(OptionDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetPollOptionById(Guid pollId, Guid optionId)
+        {
+            var query = new GetPollOptionByIdQuery { PollId = pollId, OptionId = optionId };
+            var response = await _mediator.Send(query);
+            return Ok(response.GetResult<OptionDto>());
+        }
+
+        [HttpPut("{pollId:guid}/options/{optionId:guid}")]
+        [Authorize(Roles = "Admin,User")] 
+        public async Task<IActionResult> UpdatePollOption(Guid pollId, Guid optionId, [FromBody] OptionForUpdateDto optionUpdateData)
+        {
+            var command = new UpdatePollOptionCommand
+            {
+                PollId = pollId,
+                OptionId = optionId,
+                OptionData = optionUpdateData
+            };
+            await _mediator.Send(command);
+            return NoContent();
+        }
+
+        [HttpDelete("{pollId:guid}/options/{optionId:guid}")]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> DeletePollOption(Guid pollId, Guid optionId)
+        {
+            var command = new DeletePollOptionCommand(pollId, optionId);
+            await _mediator.Send(command);
+            return NoContent();
+        }
+
     }
 }
