@@ -1,13 +1,16 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll;
-using PollSystemApp.Application.UseCases.Polls.Queries.GetPollById;
+using PollSystemApp.Api.Extensions; 
 using PollSystemApp.Application.Common.Dto.PollDtos;
 using PollSystemApp.Application.Common.Responses;
-using PollSystemApp.Api.Extensions; 
+using PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll;
+using PollSystemApp.Application.UseCases.Polls.Commands.DeletePoll;
+using PollSystemApp.Application.UseCases.Polls.Commands.UpdatePoll;
+using PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls;
+using PollSystemApp.Application.UseCases.Polls.Queries.GetPollById;
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 
 namespace PollSystemApp.Api.Controllers
 {
@@ -43,6 +46,31 @@ namespace PollSystemApp.Api.Controllers
             var response = await _mediator.Send(query); 
 
             return Ok(response.GetResult<PollDto>());
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllPolls([FromQuery] GetAllPollsQuery query) 
+        {
+            var response = await _mediator.Send(query);
+            return Ok(response.GetResult<List<PollDto>>());
+        }
+
+        [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> UpdatePoll(Guid id, [FromBody] PollForUpdateDto pollUpdateDto)
+        {
+            var command = new UpdatePollCommand { Id = id, PollData = pollUpdateDto };
+            await _mediator.Send(command); 
+            return NoContent();
+        }
+
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> DeletePoll(Guid id)
+        {
+            var command = new DeletePollCommand(id);
+            await _mediator.Send(command); 
+            return NoContent();
         }
     }
 }
