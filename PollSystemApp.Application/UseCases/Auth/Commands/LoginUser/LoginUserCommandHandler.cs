@@ -54,6 +54,8 @@ namespace PollSystemApp.Application.UseCases.Auth.Commands.LoginUser
             var updateResult = await _repositoryManager.Users.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
+                var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                throw new Exception($"User login succeeded but failed to save refresh token: {errors}");
             }
 
             var authResponse = new AuthResponseDto
