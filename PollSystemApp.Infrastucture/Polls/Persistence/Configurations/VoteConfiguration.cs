@@ -27,7 +27,7 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence.Configurations
             builder.HasOne<User>()
                .WithMany() 
                .HasForeignKey(v => v.UserId)
-               .IsRequired()
+               .IsRequired(false)
                .OnDelete(DeleteBehavior.Restrict);
         }
     }
