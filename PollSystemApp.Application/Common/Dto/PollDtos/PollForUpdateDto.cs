@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollSystemApp.Application.Common.Dto.PollDtos
+﻿namespace PollSystemApp.Application.Common.Dto.PollDtos
 {
     public class PollForUpdateDto
     {

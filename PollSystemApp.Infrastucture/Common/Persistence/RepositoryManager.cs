@@ -33,15 +33,15 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _userRepository = new Lazy<IUserRepository>(() => new UserRepository(_userManager, _dbContext));
             _optionRepository = new Lazy<IOptionRepository>(() => new OptionRepository(_dbContext));
-            _optionVoteSummaryRepository = new Lazy<IOptionVoteSummaryRepository>(() => new OptionVoteSummaryRepository( _dbContext));
-            _pollRepository = new Lazy<IPollRepository>(() => new PollRepository( _dbContext));
-            _pollResultRepository = new Lazy<IPollResultRepository>(() => new PollResultRepository( _dbContext));
-            _tagRepository = new Lazy<ITagRepository>(() => new TagRepository( _dbContext));
-            _voteRepository = new Lazy<IVoteRepository>(() => new VoteRepository( _dbContext));
-            
+            _optionVoteSummaryRepository = new Lazy<IOptionVoteSummaryRepository>(() => new OptionVoteSummaryRepository(_dbContext));
+            _pollRepository = new Lazy<IPollRepository>(() => new PollRepository(_dbContext));
+            _pollResultRepository = new Lazy<IPollResultRepository>(() => new PollResultRepository(_dbContext));
+            _tagRepository = new Lazy<ITagRepository>(() => new TagRepository(_dbContext));
+            _voteRepository = new Lazy<IVoteRepository>(() => new VoteRepository(_dbContext));
+
         }
 
-  
+
 
         public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
         {

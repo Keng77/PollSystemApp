@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollSystemApp.Application.Common.Dto.PollResultDtos
+﻿namespace PollSystemApp.Application.Common.Dto.PollResultDtos
 {
     public class OptionVoteSummaryDto
     {

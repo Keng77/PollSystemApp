@@ -15,10 +15,10 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(500);
 
-            builder.HasOne<Poll>() 
-                .WithMany()       
+            builder.HasOne<Poll>()
+                .WithMany()
                 .HasForeignKey(o => o.PollId)
-                .IsRequired() 
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

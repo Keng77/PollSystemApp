@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using PollSystemApp.Application.Common.Dto.VoteDtos;
-using System;
 
 namespace PollSystemApp.Application.Common.Validation.VoteDtos
 {
@@ -13,10 +12,10 @@ namespace PollSystemApp.Application.Common.Validation.VoteDtos
 
             RuleFor(v => v.OptionIds)
                 .NotEmpty().WithMessage("At least one Option ID must be provided.")
-                .Must(optionIds => optionIds != null && optionIds.Count > 0) 
+                .Must(optionIds => optionIds != null && optionIds.Count > 0)
                 .WithMessage("At least one Option ID must be selected.");
 
-            
+
             RuleForEach(v => v.OptionIds)
                 .NotEmpty().WithMessage("Option ID cannot be empty.");
         }

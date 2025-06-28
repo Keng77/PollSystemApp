@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using PollSystemApp.Application.Common.Dto.PollDtos;
-using System;
 
 namespace PollSystemApp.Application.Common.Validation.PollDtos
 {
@@ -17,11 +16,11 @@ namespace PollSystemApp.Application.Common.Validation.PollDtos
 
             RuleFor(p => p.StartDate)
                 .NotEmpty().WithMessage("Start date is required.");
-             
+
 
             RuleFor(p => p.EndDate)
                 .NotEmpty().WithMessage("End date is required.")
-                .GreaterThan(p => p.StartDate).WithMessage("End date must be after start date.");                      
+                .GreaterThan(p => p.StartDate).WithMessage("End date must be after start date.");
         }
     }
 }

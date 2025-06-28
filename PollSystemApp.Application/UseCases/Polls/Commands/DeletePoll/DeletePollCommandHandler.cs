@@ -1,16 +1,11 @@
 ﻿using MediatR;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePoll
 {
-    public class DeletePollCommandHandler : IRequestHandler<DeletePollCommand, ApiBaseResponse?> 
+    public class DeletePollCommandHandler : IRequestHandler<DeletePollCommand, Unit>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly ICurrentUserService _currentUserService;
@@ -21,7 +16,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePoll
             _currentUserService = currentUserService;
         }
 
-        public async Task<ApiBaseResponse?> Handle(DeletePollCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(DeletePollCommand request, CancellationToken cancellationToken)
         {
             var poll = await _repositoryManager.Polls.GetByIdAsync(request.Id, trackChanges: false);
 
@@ -39,7 +34,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePoll
             _repositoryManager.Polls.Delete(poll);
             await _repositoryManager.CommitAsync(cancellationToken);
 
-            return new ApiOkResponse();
+            return Unit.Value;
         }
     }
 }

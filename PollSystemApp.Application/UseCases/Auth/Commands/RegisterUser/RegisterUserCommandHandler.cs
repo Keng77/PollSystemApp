@@ -1,19 +1,12 @@
 ﻿using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Identity; 
-using PollSystemApp.Application.Common.Interfaces; 
-using PollSystemApp.Application.Common.Responses;
-using PollSystemApp.Domain.Common.Exceptions; 
-using PollSystemApp.Domain.Users; 
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic; 
+using PollSystemApp.Application.Common.Interfaces;
+using PollSystemApp.Domain.Common.Exceptions;
+using PollSystemApp.Domain.Users;
 
 namespace PollSystemApp.Application.UseCases.Auth.Commands.RegisterUser;
 
-public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, ApiBaseResponse>
+public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Unit>
 {
     private readonly IRepositoryManager _repositoryManager;
     private readonly IMapper _mapper;
@@ -24,9 +17,9 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, A
         _mapper = mapper;
     }
 
-    public async Task<ApiBaseResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
-        var user = _mapper.Map<User>(request); 
+        var user = _mapper.Map<User>(request);
         user.CreatedAt = DateTime.UtcNow;
         user.IsActive = true;
 
@@ -34,8 +27,11 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, A
 
         if (!result.Succeeded)
         {
-            var errors = result.Errors.Select(e => e.Description);
-            throw new BadRequestException($"User registration failed: {string.Join(", ", errors)}");
+            var errorsDictionary = result.Errors
+            .GroupBy(e => e.Code.Contains("Password") ? "Password" : e.Code.Contains("Email") ? "Email" : e.Code.Contains("UserName") ? "UserName" : "General")
+            .ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray());
+
+            throw new ValidationAppException(errorsDictionary);
         }
 
         var roleResult = await _repositoryManager.Users.AddRolesToUserAsync(user, new List<string> { "User" });
@@ -43,6 +39,6 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, A
         {
         }
 
-        return new ApiOkResponse(); 
+        return Unit.Value;
     }
 }

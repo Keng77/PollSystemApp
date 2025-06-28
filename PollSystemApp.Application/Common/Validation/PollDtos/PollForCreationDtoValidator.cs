@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using PollSystemApp.Application.Common.Dto.PollDtos;
 using PollSystemApp.Application.Common.Validation.OptionDtos;
-using System;
 
 namespace PollSystemApp.Application.Common.Validation.PollDtos
 {
@@ -28,7 +27,7 @@ namespace PollSystemApp.Application.Common.Validation.PollDtos
                 .NotEmpty().WithMessage("At least one option is required.")
                 .Must(options => options.Count >= 2).WithMessage("A poll must have at least two options.");
 
-            RuleForEach(p => p.Options).SetValidator(new OptionForCreationDtoValidator());            
+            RuleForEach(p => p.Options).SetValidator(new OptionForCreationDtoValidator());
         }
     }
 }

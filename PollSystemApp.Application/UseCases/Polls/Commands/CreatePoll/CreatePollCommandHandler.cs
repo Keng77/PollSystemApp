@@ -1,36 +1,30 @@
 ﻿using AutoMapper;
 using MediatR;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses; 
+using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using PollSystemApp.Domain.Common.Exceptions; 
-using System.Collections.Generic; 
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll
 {
-    public class CreatePollCommandHandler : IRequestHandler<CreatePollCommand, ApiBaseResponse>
+    public class CreatePollCommandHandler : IRequestHandler<CreatePollCommand, Guid>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
 
-        public CreatePollCommandHandler(IRepositoryManager repositoryManager, IMapper mapper , ICurrentUserService currentUserService)
+        public CreatePollCommandHandler(IRepositoryManager repositoryManager, IMapper mapper, ICurrentUserService currentUserService)
         {
             _repositoryManager = repositoryManager;
             _mapper = mapper;
             _currentUserService = currentUserService;
         }
 
-        public async Task<ApiBaseResponse> Handle(CreatePollCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(CreatePollCommand request, CancellationToken cancellationToken)
         {
             var userId = _currentUserService.UserId;
 
-            if (!userId.HasValue) 
-            { 
+            if (!userId.HasValue)
+            {
                 throw new ForbiddenAccessException("User is not authenticated or user ID could not be determined.");
             }
 
@@ -70,13 +64,13 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll
                     _repositoryManager.Options.Create(option);
                 }
             }
-            else 
+            else
             {
-               throw new BadRequestException("A poll must have at least one option.");
+                throw new BadRequestException("A poll must have at least one option.");
             }
 
             await _repositoryManager.CommitAsync(cancellationToken);
-            return new ApiOkResponse<Guid>(poll.Id);
+            return poll.Id;
         }
     }
 }

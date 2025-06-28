@@ -1,12 +1,9 @@
-﻿using Microsoft.Extensions.Options; 
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PollSystemApp.Application.Common.Interfaces.Authentication;
-using PollSystemApp.Application.Common.Settings; 
+using PollSystemApp.Application.Common.Settings;
 using PollSystemApp.Domain.Users;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 

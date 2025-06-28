@@ -1,20 +1,15 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Options;
 using PollSystemApp.Application.Common.Dto.UserDtos;
 using PollSystemApp.Application.Common.Interfaces;
 using PollSystemApp.Application.Common.Interfaces.Authentication;
-using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Application.Common.Settings;
 using PollSystemApp.Domain.Common.Exceptions;
-using System;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 
 namespace PollSystemApp.Application.UseCases.Auth.Commands.RefreshToken
 {
-    public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, ApiBaseResponse>
+    public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthResponseDto>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
@@ -33,10 +28,10 @@ namespace PollSystemApp.Application.UseCases.Auth.Commands.RefreshToken
             _jwtSettings = jwtOptions.Value;
         }
 
-        public async Task<ApiBaseResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+        public async Task<AuthResponseDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             var principal = _tokenValidator.GetPrincipalFromExpiredToken(request.AccessToken);
-            if (principal?.Identity?.Name == null) 
+            if (principal?.Identity?.Name == null)
             {
                 throw new BadRequestException("Invalid access token or refresh token.");
             }
@@ -47,10 +42,10 @@ namespace PollSystemApp.Application.UseCases.Auth.Commands.RefreshToken
                 throw new BadRequestException("Invalid access token: User ID not found or invalid.");
             }
 
-            var user = await _repositoryManager.Users.GetByIdAsync(userId, trackChanges: true); 
+            var user = await _repositoryManager.Users.GetByIdAsync(userId, trackChanges: true);
 
             if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-            {              
+            {
                 throw new BadRequestException("Invalid refresh token or refresh token expired.");
             }
 
@@ -65,7 +60,7 @@ namespace PollSystemApp.Application.UseCases.Auth.Commands.RefreshToken
             var updateResult = await _repositoryManager.Users.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
-                throw new Exception("Failed to update user's refresh token."); 
+                throw new Exception("Failed to update user's refresh token.");
             }
 
             var authResponse = new AuthResponseDto
@@ -75,7 +70,7 @@ namespace PollSystemApp.Application.UseCases.Auth.Commands.RefreshToken
                 Expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes)
             };
 
-            return new ApiOkResponse<AuthResponseDto>(authResponse);
+            return authResponse;
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PollSystemApp.Application.Common.Dto.UserDtos
+﻿namespace PollSystemApp.Application.Common.Dto.UserDtos
 {
     public class UserDto
     {

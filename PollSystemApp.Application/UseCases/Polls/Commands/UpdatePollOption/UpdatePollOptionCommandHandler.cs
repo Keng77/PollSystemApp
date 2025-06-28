@@ -1,16 +1,12 @@
 ﻿using AutoMapper;
 using MediatR;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption
 {
-    public class UpdatePollOptionCommandHandler : IRequestHandler<UpdatePollOptionCommand, ApiBaseResponse>
+    public class UpdatePollOptionCommandHandler : IRequestHandler<UpdatePollOptionCommand, Unit>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
@@ -23,7 +19,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption
             _currentUserService = currentUserService;
         }
 
-        public async Task<ApiBaseResponse> Handle(UpdatePollOptionCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(UpdatePollOptionCommand request, CancellationToken cancellationToken)
         {
             var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, trackChanges: false);
             if (poll == null)
@@ -39,7 +35,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption
 
             var option = await _repositoryManager.Options.FirstOrDefaultAsync(
                 o => o.Id == request.OptionId && o.PollId == request.PollId,
-                trackChanges: true); 
+                trackChanges: true);
 
             if (option == null)
             {
@@ -49,7 +45,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption
 
             await _repositoryManager.CommitAsync(cancellationToken);
 
-            return new ApiOkResponse(); 
+            return Unit.Value;
         }
     }
 }

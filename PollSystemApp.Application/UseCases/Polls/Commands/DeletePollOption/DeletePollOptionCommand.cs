@@ -1,10 +1,8 @@
 ﻿using MediatR;
-using PollSystemApp.Application.Common.Responses;
-using System;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePollOption
 {
-    public class DeletePollOptionCommand : IRequest<ApiBaseResponse>
+    public class DeletePollOptionCommand : IRequest<Unit>
     {
         public Guid PollId { get; }
         public Guid OptionId { get; }

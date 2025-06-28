@@ -1,20 +1,15 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PollSystemApp.Application.Common.Dto.OptionDtos;
 using PollSystemApp.Application.Common.Dto.PollDtos;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Pagination; 
-using PollSystemApp.Application.Common.Responses;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using PollSystemApp.Domain.Polls; 
+using PollSystemApp.Application.Common.Pagination;
+using PollSystemApp.Domain.Polls;
 
 namespace PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls
 {
-    public class GetAllPollsQueryHandler : IRequestHandler<GetAllPollsQuery, ApiBaseResponse>
+    public class GetAllPollsQueryHandler : IRequestHandler<GetAllPollsQuery, PagedResponse<PollDto>>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
@@ -25,7 +20,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls
             _mapper = mapper;
         }
 
-        public async Task<ApiBaseResponse> Handle(GetAllPollsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResponse<PollDto>> Handle(GetAllPollsQuery request, CancellationToken cancellationToken)
         {
             IQueryable<Poll> pollsQueryable = _repositoryManager.Polls.FindAll(trackChanges: false);
             pollsQueryable = pollsQueryable.Include(p => p.Tags);
@@ -72,7 +67,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls
                 cancellationToken);
 
             var pollDtos = new List<PollDto>();
-            foreach (var poll in pagedPolls) 
+            foreach (var poll in pagedPolls)
             {
                 var pollDto = _mapper.Map<PollDto>(poll);
                 var options = await _repositoryManager.Options
@@ -83,7 +78,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls
                 pollDtos.Add(pollDto);
             }
 
-            return new ApiOkResponse<(List<PollDto> Items, PaginationMetadata MetaData)>((pollDtos, pagedPolls.MetaData));
+            return new PagedResponse<PollDto>(pollDtos, pagedPolls.MetaData);
         }
     }
 }

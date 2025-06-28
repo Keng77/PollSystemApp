@@ -1,7 +1,7 @@
-using PollSystemApp.Infrastructure;
-using PollSystemApp.Application;
-using PollSystemApp.Api.Middleware;
 using Microsoft.OpenApi.Models;
+using PollSystemApp.Api.Middleware;
+using PollSystemApp.Application;
+using PollSystemApp.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
-        Scheme = "Bearer" 
+        Scheme = "Bearer"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -27,7 +27,7 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer" 
+                    Id = "Bearer"
                 }
             },
             new string[] {}
@@ -42,7 +42,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); 
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
