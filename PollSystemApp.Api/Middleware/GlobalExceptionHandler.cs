@@ -21,7 +21,7 @@ namespace PollSystemApp.Api.Middleware
             Exception exception,
             CancellationToken cancellationToken)
         {
-            _logger.LogError(exception, "An unhandled exception occurred: {ErrorMessage} Trace: {StackTrace}", exception.Message, exception.StackTrace);
+            _logger.LogError(exception, "An unhandled exception occurred: {ErrorMessage}", exception.Message);
 
             (int statusCode, string title, string? detail, IReadOnlyDictionary<string, string[]>? validationErrors) = exception switch
             {
