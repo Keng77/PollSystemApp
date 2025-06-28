@@ -12,15 +12,15 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence.Configurations
             builder.HasKey(pr => pr.Id);
 
             builder.HasOne<Poll>()
-                .WithMany() 
+                .WithMany()
                 .HasForeignKey(pr => pr.PollId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(pr => pr.Options)
-                .WithOne(ovs => ovs.PollResult) 
+                .WithOne(ovs => ovs.PollResult)
                 .HasForeignKey(ovs => ovs.PollResultId)
-                .IsRequired(false) 
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

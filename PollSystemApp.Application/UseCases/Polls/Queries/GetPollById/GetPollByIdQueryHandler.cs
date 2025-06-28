@@ -1,21 +1,15 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PollSystemApp.Application.Common.Dto.OptionDtos;
 using PollSystemApp.Application.Common.Dto.PollDtos;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses; 
-using PollSystemApp.Domain.Common.Exceptions;    
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
 
 namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollById
 {
-    public class GetPollByIdQueryHandler : IRequestHandler<GetPollByIdQuery, ApiBaseResponse>
+    public class GetPollByIdQueryHandler : IRequestHandler<GetPollByIdQuery, PollDto>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
@@ -26,7 +20,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollById
             _mapper = mapper;
         }
 
-        public async Task<ApiBaseResponse> Handle(GetPollByIdQuery request, CancellationToken cancellationToken)
+        public async Task<PollDto> Handle(GetPollByIdQuery request, CancellationToken cancellationToken)
         {
             var poll = await _repositoryManager.Polls
                                 .FindByCondition(p => p.Id == request.Id, trackChanges: false)
@@ -41,7 +35,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollById
 
             pollDto.Options = _mapper.Map<List<OptionDto>>(options);
 
-            return new ApiOkResponse<PollDto>(pollDto);
+            return pollDto;
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollSystemApp.Application.Common.Pagination
+﻿namespace PollSystemApp.Application.Common.Pagination
 {
     public class PaginationMetadata
     {

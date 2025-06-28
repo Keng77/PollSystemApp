@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollSystemApp.Application.Common.Dto.OptionDtos
+﻿namespace PollSystemApp.Application.Common.Dto.OptionDtos
 {
     public class OptionDto
     {

@@ -1,13 +1,11 @@
 ﻿using MediatR;
-using PollSystemApp.Application.Common.Dto.PollDtos;   
-using PollSystemApp.Application.Common.Pagination;    
-using PollSystemApp.Application.Common.Responses;       
-using System;
-using System.Collections.Generic;
+using PollSystemApp.Application.Common.Dto.PollDtos;
+using PollSystemApp.Application.Common.Pagination;
+
 
 namespace PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls
 {
-    public class GetAllPollsQuery : IRequest<ApiBaseResponse>
+    public class GetAllPollsQuery : IRequest<PagedResponse<PollDto>>
     {
         private const int MaxPageSize = 50;
         private int _pageSize = 10;

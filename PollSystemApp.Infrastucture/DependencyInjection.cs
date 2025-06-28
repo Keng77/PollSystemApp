@@ -39,7 +39,7 @@ namespace PollSystemApp.Infrastructure
             return services;
         }
 
-        
+
         private static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
             string connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
@@ -51,11 +51,11 @@ namespace PollSystemApp.Infrastructure
                   b.EnableRetryOnFailure();
               })
             );
-                        
+
             return services;
         }
 
-       
+
         public static IServiceCollection AddConfigIdentity(this IServiceCollection services)
         {
             var builder = services.AddIdentity<User, Role>(o =>
@@ -75,25 +75,25 @@ namespace PollSystemApp.Infrastructure
 
         private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            
+
             var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
 
             if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.Secret))
             {
-               throw new InvalidOperationException("JWT Secret is not configured. Please check your configuration (appsettings.json, user secrets, environment variables).");
+                throw new InvalidOperationException("JWT Secret is not configured. Please check your configuration (appsettings.json, user secrets, environment variables).");
             }
 
-           
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; 
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
                 options.SaveToken = true;
-                options.RequireHttpsMetadata = false; 
+                options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,

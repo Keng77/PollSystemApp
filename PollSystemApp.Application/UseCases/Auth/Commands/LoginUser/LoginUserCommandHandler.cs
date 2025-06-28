@@ -1,19 +1,14 @@
 ﻿using MediatR;
-using PollSystemApp.Application.Common.Dto.UserDtos; 
-using PollSystemApp.Application.Common.Interfaces;    
-using PollSystemApp.Application.Common.Interfaces.Authentication; 
-using PollSystemApp.Application.Common.Responses;
-using PollSystemApp.Domain.Common.Exceptions; 
-using PollSystemApp.Domain.Users;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options; 
+using Microsoft.Extensions.Options;
+using PollSystemApp.Application.Common.Dto.UserDtos;
+using PollSystemApp.Application.Common.Interfaces;
+using PollSystemApp.Application.Common.Interfaces.Authentication;
 using PollSystemApp.Application.Common.Settings;
+using PollSystemApp.Domain.Common.Exceptions;
 
 namespace PollSystemApp.Application.UseCases.Auth.Commands.LoginUser
 {
-    public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, ApiBaseResponse>
+    public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthResponseDto>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
@@ -29,7 +24,7 @@ namespace PollSystemApp.Application.UseCases.Auth.Commands.LoginUser
             _jwtSettings = jwtOptions.Value;
         }
 
-        public async Task<ApiBaseResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+        public async Task<AuthResponseDto> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _repositoryManager.Users.GetByUserNameAsync(request.UserNameOrEmail)
                        ?? await _repositoryManager.Users.GetByEmailAsync(request.UserNameOrEmail);
@@ -47,9 +42,9 @@ namespace PollSystemApp.Application.UseCases.Auth.Commands.LoginUser
             var roles = await _repositoryManager.Users.GetRolesAsync(user);
             var accessToken = _jwtTokenGenerator.GenerateToken(user, roles);
 
-            var refreshToken = Guid.NewGuid().ToString("N"); 
+            var refreshToken = Guid.NewGuid().ToString("N");
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes * 2); 
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes * 2);
 
             var updateResult = await _repositoryManager.Users.UpdateAsync(user);
             if (!updateResult.Succeeded)
@@ -61,11 +56,11 @@ namespace PollSystemApp.Application.UseCases.Auth.Commands.LoginUser
             var authResponse = new AuthResponseDto
             {
                 Token = accessToken,
-                RefreshToken = refreshToken, 
+                RefreshToken = refreshToken,
                 Expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes)
             };
 
-            return new ApiOkResponse<AuthResponseDto>(authResponse);
+            return authResponse;
         }
     }
 }

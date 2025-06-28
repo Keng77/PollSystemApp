@@ -2,16 +2,12 @@
 using MediatR;
 using PollSystemApp.Application.Common.Dto.OptionDtos;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollOptionById
 {
-    public class GetPollOptionByIdQueryHandler : IRequestHandler<GetPollOptionByIdQuery, ApiBaseResponse>
+    public class GetPollOptionByIdQueryHandler : IRequestHandler<GetPollOptionByIdQuery, OptionDto>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
@@ -22,7 +18,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollOptionById
             _mapper = mapper;
         }
 
-        public async Task<ApiBaseResponse> Handle(GetPollOptionByIdQuery request, CancellationToken cancellationToken)
+        public async Task<OptionDto> Handle(GetPollOptionByIdQuery request, CancellationToken cancellationToken)
         {
             var pollExists = await _repositoryManager.Polls.ExistsAsync(p => p.Id == request.PollId, cancellationToken);
             if (!pollExists)
@@ -41,7 +37,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollOptionById
             }
 
             var optionDto = _mapper.Map<OptionDto>(option);
-            return new ApiOkResponse<OptionDto>(optionDto);
+            return optionDto;
         }
     }
 }

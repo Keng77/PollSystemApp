@@ -1,10 +1,8 @@
 ﻿using MediatR;
-using PollSystemApp.Application.Common.Responses;
-using System;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.EndPollEarly
 {
-    public class EndPollEarlyCommand : IRequest<ApiBaseResponse>
+    public class EndPollEarlyCommand : IRequest<Unit>
     {
         public Guid PollId { get; set; }
 

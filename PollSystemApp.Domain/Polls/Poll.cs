@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PollSystemApp.Domain.Polls
+﻿namespace PollSystemApp.Domain.Polls
 {
     public class Poll
     {
@@ -9,7 +6,7 @@ namespace PollSystemApp.Domain.Polls
 
         public string Title { get; set; } = string.Empty;
 
-        public string? Description { get; set; } 
+        public string? Description { get; set; }
 
         public bool IsAnonymous { get; set; }
 

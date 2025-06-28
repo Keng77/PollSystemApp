@@ -1,19 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace PollSystemApp.Application.UseCases.Votes.Commands.CreateVote
 {
-    public class CreateVoteCommandHandler : IRequestHandler<CreateVoteCommand, ApiBaseResponse>
+    public class CreateVoteCommandHandler : IRequestHandler<CreateVoteCommand, Unit>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly ICurrentUserService _currentUserService;
@@ -29,7 +23,7 @@ namespace PollSystemApp.Application.UseCases.Votes.Commands.CreateVote
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ApiBaseResponse> Handle(CreateVoteCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(CreateVoteCommand request, CancellationToken cancellationToken)
         {
             var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, trackChanges: false);
             if (poll == null)
@@ -95,9 +89,9 @@ namespace PollSystemApp.Application.UseCases.Votes.Commands.CreateVote
                     Id = Guid.NewGuid(),
                     PollId = request.PollId,
                     OptionId = optionId,
-                    UserId = userIdForVote, 
+                    UserId = userIdForVote,
                     CreatedAt = now,
-                    IpAddress = ipAddressForVote 
+                    IpAddress = ipAddressForVote
                 });
             }
 
@@ -109,7 +103,7 @@ namespace PollSystemApp.Application.UseCases.Votes.Commands.CreateVote
             await _repositoryManager.Votes.CreateRangeAsync(votesToCreate, cancellationToken);
             await _repositoryManager.CommitAsync(cancellationToken);
 
-            return new ApiOkResponse();
+            return Unit.Value;
         }
     }
 }

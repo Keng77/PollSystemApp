@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using System;
 
 namespace PollSystemApp.Application.UseCases.Polls.Queries.ExportPollResultsToCsv
 {
