@@ -6,134 +6,62 @@ using PollSystemApp.Application.Common.Interfaces;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
 
-namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults
+namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults;
+
+public class GetPollResultsQueryHandler : IRequestHandler<GetPollResultsQuery, PollResultDto>
 {
-    public class GetPollResultsQueryHandler : IRequestHandler<GetPollResultsQuery, PollResultDto>
+    private readonly IRepositoryManager _repositoryManager;
+    private readonly IMapper _mapper;
+    private readonly IPollResultsCalculator _resultsCalculator;
+
+    public GetPollResultsQueryHandler(IRepositoryManager repositoryManager, IMapper mapper, IPollResultsCalculator resultsCalculator)
     {
-        private readonly IRepositoryManager _repositoryManager;
-        private readonly IMapper _mapper;
+        _repositoryManager = repositoryManager;
+        _mapper = mapper;
+        _resultsCalculator = resultsCalculator;
+    }
 
-        public GetPollResultsQueryHandler(IRepositoryManager repositoryManager, IMapper mapper)
+    public async Task<PollResultDto> Handle(GetPollResultsQuery request, CancellationToken cancellationToken)
+    {
+        var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, false)
+            ?? throw new NotFoundException(nameof(Poll), request.PollId);
+
+        if (DateTime.UtcNow <= poll.EndDate && !(poll.EndDate == poll.StartDate))
         {
-            _repositoryManager = repositoryManager;
-            _mapper = mapper;
+            throw new BadRequestException($"Results for this poll will be available after {poll.EndDate:o}.");
         }
 
-        public async Task<PollResultDto> Handle(GetPollResultsQuery request, CancellationToken cancellationToken)
+        var existingPollResult = await _repositoryManager.PollResults.GetLatestPollResultAsync(request.PollId, false, cancellationToken);
+
+        if (existingPollResult != null && (poll.EndDate < existingPollResult.CalculatedAt || poll.EndDate == poll.StartDate))
         {
-            var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, trackChanges: false);
-            if (poll == null)
-            {
-                throw new NotFoundException(nameof(Poll), request.PollId);
-            }
-
-            if (DateTime.UtcNow <= poll.EndDate && !(poll.EndDate == poll.StartDate))
-            {
-                throw new BadRequestException($"Results for this poll will be available after {poll.EndDate:o}.");
-            }
-
-            var existingPollResult = await _repositoryManager.PollResults
-                .FindByCondition(pr => pr.PollId == request.PollId, trackChanges: false)
-                .Include(pr => pr.Options)
-                .OrderByDescending(pr => pr.CalculatedAt)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (existingPollResult != null)
-            {
-                if (poll.EndDate < existingPollResult.CalculatedAt || poll.EndDate == poll.StartDate)
-                {
-                    var resultDto = await MapPollResultToDtoAsync(existingPollResult, poll.Title, cancellationToken);
-                    return resultDto;
-                }
-            }
-
-            var options = await _repositoryManager.Options
-                .FindByCondition(o => o.PollId == request.PollId, trackChanges: false)
-                .OrderBy(o => o.Order)
-                .ToListAsync(cancellationToken);
-
-            if (!options.Any())
-            {
-                var emptyResultDto = new PollResultDto
-                {
-                    PollId = poll.Id,
-                    PollTitle = poll.Title,
-                    TotalVotes = 0,
-                    Options = new List<OptionVoteSummaryDto>(),
-                    CalculatedAt = DateTime.UtcNow
-                };
-                return emptyResultDto;
-            }
-
-            var votes = await _repositoryManager.Votes
-                .FindByCondition(v => v.PollId == request.PollId, trackChanges: false)
-                .ToListAsync(cancellationToken);
-
-            int totalVotesInPoll = votes.GroupBy(v => v.UserId)
-                                        .Count(g => g.Key.HasValue && g.Key.Value != Guid.Empty);
-
-            if (poll.IsAnonymous)
-            {
-                totalVotesInPoll = votes.Count;
-                if (poll.IsMultipleChoice && totalVotesInPoll > 0 && options.Count > 0)
-                {
-                    totalVotesInPoll = votes.Count;
-                }
-            }
-
-
-            var newPollResult = new PollResult
-            {
-                Id = Guid.NewGuid(),
-                PollId = poll.Id,
-                CalculatedAt = DateTime.UtcNow,
-                Options = new List<OptionVoteSummary>()
-            };
-
-            foreach (var option in options)
-            {
-                var votesForOption = votes.Count(v => v.OptionId == option.Id);
-                double percentage = (totalVotesInPoll > 0) ? Math.Round(((double)votesForOption / totalVotesInPoll) * 100, 2) : 0;
-
-                var summary = new OptionVoteSummary
-                {
-                    Id = Guid.NewGuid(),
-                    OptionId = option.Id,
-                    Votes = votesForOption,
-                    Percentage = percentage,
-                };
-                newPollResult.Options.Add(summary);
-            }
-            newPollResult.TotalVotes = totalVotesInPoll;
-
-            _repositoryManager.PollResults.Create(newPollResult);
-            await _repositoryManager.CommitAsync(cancellationToken);
-
-            var calculatedResultDto = await MapPollResultToDtoAsync(newPollResult, poll.Title, cancellationToken);
-            return calculatedResultDto;
+            return await MapPollResultToDtoAsync(existingPollResult, poll.Title, cancellationToken);
         }
 
-        private async Task<PollResultDto> MapPollResultToDtoAsync(PollResult pollResult, string pollTitle, CancellationToken cancellationToken)
+        var calculatedResult = await _resultsCalculator.CalculateResultsAsync(poll, cancellationToken);
+
+        _repositoryManager.PollResults.Create(calculatedResult);
+        await _repositoryManager.CommitAsync(cancellationToken);
+
+        return await MapPollResultToDtoAsync(calculatedResult, poll.Title, cancellationToken);
+    }
+
+    private async Task<PollResultDto> MapPollResultToDtoAsync(PollResult pollResult, string pollTitle, CancellationToken cancellationToken)
+    {
+        var resultDto = _mapper.Map<PollResultDto>(pollResult);
+        resultDto.PollTitle = pollTitle;
+        var optionIds = pollResult.Options.Select(ovs => ovs.OptionId).Distinct().ToList();
+        if (optionIds.Any())
         {
-            var resultDto = _mapper.Map<PollResultDto>(pollResult);
-            resultDto.PollTitle = pollTitle;
-
-            var optionIds = pollResult.Options.Select(ovs => ovs.OptionId).Distinct().ToList();
-            if (optionIds.Any())
+            var optionsFromDb = await _repositoryManager.Options.GetOptionTextsByIdsAsync(optionIds, cancellationToken);
+            foreach (var summaryDto in resultDto.Options)
             {
-                var optionsFromDb = await _repositoryManager.Options
-                    .FindByCondition(o => optionIds.Contains(o.Id), trackChanges: false)
-                    .ToDictionaryAsync(o => o.Id, o => o.Text, cancellationToken);
-
-                foreach (var summaryDto in resultDto.Options)
+                if (optionsFromDb.TryGetValue(summaryDto.OptionId, out var text))
                 {
-                    if (optionsFromDb.TryGetValue(summaryDto.OptionId, out var text))
-                    {
-                        summaryDto.OptionText = text;
-                    }
+                    summaryDto.OptionText = text;
                 }
             }
-            return resultDto;
         }
+        return resultDto;
     }
 }

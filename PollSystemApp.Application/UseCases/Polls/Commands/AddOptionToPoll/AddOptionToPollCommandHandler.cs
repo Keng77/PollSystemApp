@@ -41,11 +41,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.AddOptionToPoll
 
             if (request.OptionData.Order <= 0)
             {
-                var lastOption = await _repositoryManager.Options
-                    .FindByCondition(o => o.PollId == request.PollId, trackChanges: false)
-                    .OrderByDescending(o => o.Order)
-                    .FirstOrDefaultAsync(cancellationToken);
-
+                var lastOption = await _repositoryManager.Options.GetLastOptionByPollIdAsync(request.PollId, false, cancellationToken);
                 option.Order = (lastOption?.Order ?? -1) + 1;
             }
 

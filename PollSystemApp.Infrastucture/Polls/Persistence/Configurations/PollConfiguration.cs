@@ -37,6 +37,10 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence.Configurations
                         j.HasKey("PollId", "TagId");
                         j.ToTable("PollTags");
                     });
+            builder.HasMany(p => p.Options)
+            .WithOne() 
+            .HasForeignKey(o => o.PollId) 
+            .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

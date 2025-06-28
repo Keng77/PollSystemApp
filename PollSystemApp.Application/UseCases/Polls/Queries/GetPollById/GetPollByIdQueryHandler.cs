@@ -22,18 +22,11 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollById
 
         public async Task<PollDto> Handle(GetPollByIdQuery request, CancellationToken cancellationToken)
         {
-            var poll = await _repositoryManager.Polls
-                                .FindByCondition(p => p.Id == request.Id, trackChanges: false)
-                                .Include(p => p.Tags)
-                                .FirstOrDefaultAsync(cancellationToken) ?? throw new NotFoundException(nameof(Poll), request.Id);
+            var poll = await _repositoryManager.Polls.GetPollWithDetailsAsync(request.Id, false, cancellationToken)
+                ?? throw new NotFoundException(nameof(Poll), request.Id);
+
             var pollDto = _mapper.Map<PollDto>(poll);
-
-            var options = await _repositoryManager.Options
-                                    .FindByCondition(o => o.PollId == poll.Id, trackChanges: false)
-                                    .OrderBy(o => o.Order)
-                                    .ToListAsync(cancellationToken);
-
-            pollDto.Options = _mapper.Map<List<OptionDto>>(options);
+            pollDto.Options = pollDto.Options.OrderBy(o => o.Order).ToList();
 
             return pollDto;
         }

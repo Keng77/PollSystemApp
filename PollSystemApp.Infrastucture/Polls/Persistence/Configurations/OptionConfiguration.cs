@@ -14,12 +14,6 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence.Configurations
             builder.Property(o => o.Text)
                 .IsRequired()
                 .HasMaxLength(500);
-
-            builder.HasOne<Poll>()
-                .WithMany()
-                .HasForeignKey(o => o.PollId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
