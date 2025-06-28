@@ -1,16 +1,10 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PollSystemApp.Application.Common.Interfaces;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using System;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
 namespace PollSystemApp.Application.UseCases.Polls.Queries.ExportPollResultsToCsv
 {
@@ -79,7 +73,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.ExportPollResultsToCs
                 pollResult = new PollResult
                 {
                     PollId = poll.Id,
-                    CalculatedAt = DateTime.UtcNow, 
+                    CalculatedAt = DateTime.UtcNow,
                     TotalVotes = totalVotesInPoll,
                     Options = new List<OptionVoteSummary>()
                 };

@@ -1,18 +1,13 @@
 ﻿using MediatR;
-using PollSystemApp.Application.Common.Dto.VoteDtos; 
-using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses;
-using PollSystemApp.Domain.Common.Exceptions; 
-using PollSystemApp.Domain.Polls;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using PollSystemApp.Application.Common.Dto.VoteDtos;
+using PollSystemApp.Application.Common.Interfaces;
+using PollSystemApp.Domain.Common.Exceptions;
+using PollSystemApp.Domain.Polls;
 
 namespace PollSystemApp.Application.UseCases.Votes.Queries.CheckUserVote
 {
-    public class CheckUserVoteQueryHandler : IRequestHandler<CheckUserVoteQuery, ApiBaseResponse>
+    public class CheckUserVoteQueryHandler : IRequestHandler<CheckUserVoteQuery, UserVoteStatusDto>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly ICurrentUserService _currentUserService;
@@ -23,7 +18,7 @@ namespace PollSystemApp.Application.UseCases.Votes.Queries.CheckUserVote
             _currentUserService = currentUserService;
         }
 
-        public async Task<ApiBaseResponse> Handle(CheckUserVoteQuery request, CancellationToken cancellationToken)
+        public async Task<UserVoteStatusDto> Handle(CheckUserVoteQuery request, CancellationToken cancellationToken)
         {
             var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, trackChanges: false);
             if (poll == null)
@@ -37,14 +32,14 @@ namespace PollSystemApp.Application.UseCases.Votes.Queries.CheckUserVote
             {
                 if (!_currentUserService.IsAuthenticated || !_currentUserService.UserId.HasValue)
                 {
-                    return new ApiOkResponse<UserVoteStatusDto>(responseDto);
+                    return responseDto;
                 }
 
                 var userId = _currentUserService.UserId.Value;
 
                 var userVotes = await _repositoryManager.Votes
                     .FindByCondition(v => v.PollId == request.PollId && v.UserId == userId, trackChanges: false)
-                    .Select(v => v.OptionId) 
+                    .Select(v => v.OptionId)
                     .ToListAsync(cancellationToken);
 
                 if (userVotes.Any())
@@ -53,7 +48,7 @@ namespace PollSystemApp.Application.UseCases.Votes.Queries.CheckUserVote
                     responseDto.VotedOptionIds = userVotes;
                 }
             }
-            return new ApiOkResponse<UserVoteStatusDto>(responseDto);
+            return responseDto;
         }
     }
 }

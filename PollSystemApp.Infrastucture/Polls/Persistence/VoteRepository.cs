@@ -2,11 +2,6 @@
 using PollSystemApp.Application.Common.Interfaces;
 using PollSystemApp.Domain.Polls;
 using PollSystemApp.Infrastructure.Common.Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Infrastructure.Polls.Persistence
 {

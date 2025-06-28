@@ -1,16 +1,11 @@
 ﻿using MediatR;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePollOption
 {
-    public class DeletePollOptionCommandHandler : IRequestHandler<DeletePollOptionCommand, ApiBaseResponse>
+    public class DeletePollOptionCommandHandler : IRequestHandler<DeletePollOptionCommand, Unit>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly ICurrentUserService _currentUserService;
@@ -21,7 +16,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePollOption
             _currentUserService = currentUserService;
         }
 
-        public async Task<ApiBaseResponse> Handle(DeletePollOptionCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(DeletePollOptionCommand request, CancellationToken cancellationToken)
         {
             var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, trackChanges: false);
             if (poll == null)
@@ -66,7 +61,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePollOption
             _repositoryManager.Options.Delete(option);
             await _repositoryManager.CommitAsync(cancellationToken);
 
-            return new ApiOkResponse();
+            return Unit.Value;
         }
     }
 }

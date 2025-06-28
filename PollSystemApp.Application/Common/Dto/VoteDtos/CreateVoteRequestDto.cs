@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PollSystemApp.Application.Common.Dto.VoteDtos
+﻿namespace PollSystemApp.Application.Common.Dto.VoteDtos
 {
     public class CreateVoteRequestDto
     {

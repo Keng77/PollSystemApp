@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using PollSystemApp.Application.Common.Dto.OptionDtos;
+﻿using PollSystemApp.Application.Common.Dto.OptionDtos;
 
 namespace PollSystemApp.Application.Common.Dto.PollDtos
 {

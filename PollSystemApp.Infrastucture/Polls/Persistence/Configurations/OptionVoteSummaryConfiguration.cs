@@ -11,12 +11,12 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence.Configurations
             builder.ToTable("OptionVoteSummaries");
             builder.HasKey(ovs => ovs.Id);
 
-           
-            builder.HasOne<Option>() 
-                .WithMany()        
+
+            builder.HasOne<Option>()
+                .WithMany()
                 .HasForeignKey(ovs => ovs.OptionId)
                 .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

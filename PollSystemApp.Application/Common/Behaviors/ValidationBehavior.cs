@@ -1,10 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
 using PollSystemApp.Domain.Common.Exceptions;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Application.Common.Behaviors
 {
@@ -30,7 +26,7 @@ namespace PollSystemApp.Application.Common.Behaviors
 
             var context = new ValidationContext<TRequest>(request);
 
-            
+
             var validationFailures = _validators
                 .Select(validator => validator.Validate(context))
                 .SelectMany(validationResult => validationResult.Errors)
@@ -39,7 +35,7 @@ namespace PollSystemApp.Application.Common.Behaviors
 
             if (validationFailures.Count > 0)
             {
-               
+
                 var errorsDictionary = validationFailures
                     .GroupBy(
                         x => x.PropertyName,
@@ -54,7 +50,7 @@ namespace PollSystemApp.Application.Common.Behaviors
                 throw new ValidationAppException(errorsDictionary);
             }
 
-            return await next(); 
+            return await next();
         }
     }
 }

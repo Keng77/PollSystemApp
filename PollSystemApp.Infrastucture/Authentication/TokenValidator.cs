@@ -2,7 +2,6 @@
 using Microsoft.IdentityModel.Tokens;
 using PollSystemApp.Application.Common.Interfaces.Authentication;
 using PollSystemApp.Application.Common.Settings;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -24,7 +23,7 @@ namespace PollSystemApp.Infrastructure.Authentication
             {
                 ValidateAudience = true,
                 ValidAudience = _jwtSettings.Audience,
-                ValidateIssuer = true, 
+                ValidateIssuer = true,
                 ValidIssuer = _jwtSettings.Issuer,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
@@ -47,7 +46,7 @@ namespace PollSystemApp.Infrastructure.Authentication
             {
                 return null;
             }
-            catch (Exception) 
+            catch (Exception)
             {
                 return null;
             }

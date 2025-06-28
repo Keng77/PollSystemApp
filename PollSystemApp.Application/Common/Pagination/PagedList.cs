@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Application.Common.Pagination
 {
@@ -24,7 +19,7 @@ namespace PollSystemApp.Application.Common.Pagination
             CancellationToken cancellationToken = default)
         {
             if (pageNumber < 1) pageNumber = 1;
-            if (pageSize < 1) pageSize = 10; 
+            if (pageSize < 1) pageSize = 10;
 
             var count = await source.CountAsync(cancellationToken);
 

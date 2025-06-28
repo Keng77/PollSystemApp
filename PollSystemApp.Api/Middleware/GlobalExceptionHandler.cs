@@ -1,14 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PollSystemApp.Domain.Common.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Api.Middleware
 {
@@ -46,7 +39,7 @@ namespace PollSystemApp.Api.Middleware
             {
                 Status = statusCode,
                 Title = title,
-                Detail = detail, 
+                Detail = detail,
                 Type = exception.GetType().Name,
                 Instance = httpContext.Request.Path
             };
@@ -71,7 +64,7 @@ namespace PollSystemApp.Api.Middleware
             {
                 HttpContext = httpContext,
                 ProblemDetails = problemDetails,
-                Exception = exception 
+                Exception = exception
             });
         }
     }

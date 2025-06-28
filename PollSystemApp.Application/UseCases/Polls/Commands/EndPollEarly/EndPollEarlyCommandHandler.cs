@@ -1,15 +1,11 @@
 ﻿using MediatR;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.EndPollEarly
 {
-    public class EndPollEarlyCommandHandler : IRequestHandler<EndPollEarlyCommand, ApiBaseResponse>
+    public class EndPollEarlyCommandHandler : IRequestHandler<EndPollEarlyCommand, Unit>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly ICurrentUserService _currentUserService;
@@ -20,7 +16,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.EndPollEarly
             _currentUserService = currentUserService;
         }
 
-        public async Task<ApiBaseResponse> Handle(EndPollEarlyCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(EndPollEarlyCommand request, CancellationToken cancellationToken)
         {
             if (!_currentUserService.IsInRole("Admin"))
             {
@@ -42,17 +38,17 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.EndPollEarly
 
             if (now < poll.StartDate)
             {
-                poll.EndDate = poll.StartDate; 
+                poll.EndDate = poll.StartDate;
                 poll.EndDate = now;
             }
-            else 
+            else
             {
                 poll.EndDate = now;
             }
 
             await _repositoryManager.CommitAsync(cancellationToken);
 
-            return new ApiOkResponse();
+            return Unit.Value;
         }
     }
 }

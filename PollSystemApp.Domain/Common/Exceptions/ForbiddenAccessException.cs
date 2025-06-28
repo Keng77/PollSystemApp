@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollSystemApp.Domain.Common.Exceptions
+﻿namespace PollSystemApp.Domain.Common.Exceptions
 {
     public class ForbiddenAccessException : Exception
     {

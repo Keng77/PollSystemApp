@@ -1,20 +1,14 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PollSystemApp.Application.Common.Dto.PollResultDtos;
 using PollSystemApp.Application.Common.Interfaces;
-using PollSystemApp.Application.Common.Responses;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults
 {
-    public class GetPollResultsQueryHandler : IRequestHandler<GetPollResultsQuery, ApiBaseResponse>
+    public class GetPollResultsQueryHandler : IRequestHandler<GetPollResultsQuery, PollResultDto>
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
@@ -25,7 +19,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults
             _mapper = mapper;
         }
 
-        public async Task<ApiBaseResponse> Handle(GetPollResultsQuery request, CancellationToken cancellationToken)
+        public async Task<PollResultDto> Handle(GetPollResultsQuery request, CancellationToken cancellationToken)
         {
             var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, trackChanges: false);
             if (poll == null)
@@ -40,7 +34,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults
 
             var existingPollResult = await _repositoryManager.PollResults
                 .FindByCondition(pr => pr.PollId == request.PollId, trackChanges: false)
-                .Include(pr => pr.Options) 
+                .Include(pr => pr.Options)
                 .OrderByDescending(pr => pr.CalculatedAt)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -49,7 +43,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults
                 if (poll.EndDate < existingPollResult.CalculatedAt || poll.EndDate == poll.StartDate)
                 {
                     var resultDto = await MapPollResultToDtoAsync(existingPollResult, poll.Title, cancellationToken);
-                    return new ApiOkResponse<PollResultDto>(resultDto);
+                    return resultDto;
                 }
             }
 
@@ -68,7 +62,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults
                     Options = new List<OptionVoteSummaryDto>(),
                     CalculatedAt = DateTime.UtcNow
                 };
-                return new ApiOkResponse<PollResultDto>(emptyResultDto);
+                return emptyResultDto;
             }
 
             var votes = await _repositoryManager.Votes
@@ -78,7 +72,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults
             int totalVotesInPoll = votes.GroupBy(v => v.UserId)
                                         .Count(g => g.Key.HasValue && g.Key.Value != Guid.Empty);
 
-            if (poll.IsAnonymous) 
+            if (poll.IsAnonymous)
             {
                 totalVotesInPoll = votes.Count;
                 if (poll.IsMultipleChoice && totalVotesInPoll > 0 && options.Count > 0)
@@ -116,7 +110,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults
             await _repositoryManager.CommitAsync(cancellationToken);
 
             var calculatedResultDto = await MapPollResultToDtoAsync(newPollResult, poll.Title, cancellationToken);
-            return new ApiOkResponse<PollResultDto>(calculatedResultDto);
+            return calculatedResultDto;
         }
 
         private async Task<PollResultDto> MapPollResultToDtoAsync(PollResult pollResult, string pollTitle, CancellationToken cancellationToken)

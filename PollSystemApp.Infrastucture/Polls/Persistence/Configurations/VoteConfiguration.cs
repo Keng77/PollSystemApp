@@ -13,21 +13,21 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence.Configurations
             builder.HasKey(v => v.Id);
 
             builder.HasOne<Poll>()
-                .WithMany() 
+                .WithMany()
                 .HasForeignKey(v => v.PollId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne<Option>()
-                .WithMany() 
+                .WithMany()
                 .HasForeignKey(v => v.OptionId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne<User>()
-               .WithMany() 
+               .WithMany()
                .HasForeignKey(v => v.UserId)
-               .IsRequired()
+               .IsRequired(false)
                .OnDelete(DeleteBehavior.Restrict);
         }
     }

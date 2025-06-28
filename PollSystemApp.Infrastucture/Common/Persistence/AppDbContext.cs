@@ -1,17 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PollSystemApp.Domain;
 using PollSystemApp.Domain.Polls;
 using PollSystemApp.Domain.Users;
-using PollSystemApp.Infrastructure.Users.Persistence.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PollSystemApp.Infrastructure.Common.Persistence
 {
@@ -26,10 +17,10 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);            
+            base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
-        
+
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

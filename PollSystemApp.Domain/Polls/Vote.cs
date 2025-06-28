@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollSystemApp.Domain.Polls
+﻿namespace PollSystemApp.Domain.Polls
 {
     public class Vote
     {
@@ -11,6 +9,6 @@ namespace PollSystemApp.Domain.Polls
         public DateTime CreatedAt { get; set; }
         public string IpAddress { get; set; } = string.Empty;
 
-        
+
     }
 }

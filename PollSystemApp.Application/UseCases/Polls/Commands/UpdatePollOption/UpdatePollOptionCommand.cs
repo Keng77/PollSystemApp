@@ -1,15 +1,13 @@
 ﻿using MediatR;
 using PollSystemApp.Application.Common.Dto.OptionDtos;
-using PollSystemApp.Application.Common.Responses;
-using System;
 using System.Text.Json.Serialization;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption
 {
-    public class UpdatePollOptionCommand : IRequest<ApiBaseResponse> 
+    public class UpdatePollOptionCommand : IRequest<Unit>
     {
         [JsonIgnore]
-        public Guid PollId { get; set; } 
+        public Guid PollId { get; set; }
         [JsonIgnore]
         public Guid OptionId { get; set; }
 

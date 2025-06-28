@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollSystemApp.Domain.Polls
+﻿namespace PollSystemApp.Domain.Polls
 {
     public class Option
     {

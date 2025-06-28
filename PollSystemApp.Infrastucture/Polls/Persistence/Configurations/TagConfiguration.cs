@@ -8,14 +8,14 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Tag> builder)
         {
-            builder.ToTable("Tags"); 
+            builder.ToTable("Tags");
             builder.HasKey(t => t.Id);
 
             builder.Property(t => t.Name)
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.HasIndex(t => t.Name).IsUnique(); 
+            builder.HasIndex(t => t.Name).IsUnique();
 
         }
     }
