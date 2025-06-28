@@ -24,7 +24,7 @@ namespace PollSystemApp.Application.Common.Mappings
             CreateMap<PollForUpdateDto, Poll>();
 
             CreateMap<Poll, PollDto>()
-                .ForMember(dest => dest.Options, opt => opt.Ignore())
+                .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options)) 
                 .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags != null ?
                 src.Tags.Select(t => t.Name).ToList() : new List<string>()));
 

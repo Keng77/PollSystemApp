@@ -16,5 +16,24 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence
         await FindByCondition(p => ids.Contains(p.Id), trackChanges)
         .ToListAsync();
 
+        public async Task<List<Guid>> GetUserVoteOptionIdsAsync(Guid pollId, Guid userId, bool trackChanges, CancellationToken cancellationToken)
+        {
+            IQueryable<Vote> query = _dbSet.Where(v => v.PollId == pollId && v.UserId == userId);
+            if (!trackChanges)
+            {
+                query = query.AsNoTracking();
+            }
+            return await query.Select(v => v.OptionId).ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Vote>> GetVotesByPollIdAsync(Guid pollId, bool trackChanges, CancellationToken cancellationToken)
+        {
+            IQueryable<Vote> query = _dbSet.Where(v => v.PollId == pollId);
+            if (!trackChanges)
+            {
+                query = query.AsNoTracking();
+            }
+            return await query.ToListAsync(cancellationToken);
+        }
     }
 }

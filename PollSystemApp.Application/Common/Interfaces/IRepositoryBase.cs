@@ -3,11 +3,7 @@
 namespace PollSystemApp.Application.Common.Interfaces
 {
     public interface IRepositoryBase<T>
-    {
-        IQueryable<T> FindAll(bool trackChanges = false);
-
-        IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false);
-
+    {  
         Task<T?> FindAsync(params object[] keyValues);
 
         ValueTask<T?> FindAsync(object[] keyValues, CancellationToken cancellationToken = default);

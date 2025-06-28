@@ -2,7 +2,7 @@
 using PollSystemApp.Application.Common.Interfaces;
 using System.Security.Claims;
 
-namespace PollSystemApp.Infrastructure.Services;
+namespace PollSystemApp.Application.Services;
 
 public class CurrentUserService : ICurrentUserService
 {

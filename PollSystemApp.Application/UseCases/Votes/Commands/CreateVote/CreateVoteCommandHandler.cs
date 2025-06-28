@@ -50,9 +50,7 @@ namespace PollSystemApp.Application.UseCases.Votes.Commands.CreateVote
                 throw new BadRequestException("This poll does not allow multiple choices. Please select only one option.");
             }
 
-            var validOptions = await _repositoryManager.Options
-                .FindByCondition(o => o.PollId == request.PollId && request.OptionIds.Contains(o.Id), trackChanges: false)
-                .ToListAsync(cancellationToken);
+            var validOptions = await _repositoryManager.Options.GetOptionsByIdsAndPollIdAsync(request.PollId, request.OptionIds, false, cancellationToken);
 
             if (validOptions.Count != request.OptionIds.Distinct().Count())
             {
