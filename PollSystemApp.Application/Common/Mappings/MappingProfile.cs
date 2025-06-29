@@ -4,6 +4,7 @@ using PollSystemApp.Application.Common.Dto.PollDtos;
 using PollSystemApp.Application.Common.Dto.PollResultDtos;
 using PollSystemApp.Application.Common.Dto.UserDtos;
 using PollSystemApp.Application.Common.Dto.VoteDtos;
+using PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll;
 using PollSystemApp.Domain.Polls;
 using PollSystemApp.Domain.Users;
 
@@ -13,6 +14,9 @@ namespace PollSystemApp.Application.Common.Mappings
     {
         public MappingProfile()
         {
+
+            CreateMap<CreatePollCommand, Poll>()
+       .ForMember(dest => dest.Tags, opt => opt.Ignore());
 
             CreateMap<OptionForCreationDto, Option>();
             CreateMap<OptionForUpdateDto, Option>();
