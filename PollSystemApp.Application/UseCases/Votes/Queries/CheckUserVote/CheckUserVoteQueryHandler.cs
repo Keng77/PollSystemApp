@@ -37,10 +37,7 @@ namespace PollSystemApp.Application.UseCases.Votes.Queries.CheckUserVote
 
                 var userId = _currentUserService.UserId.Value;
 
-                var userVotes = await _repositoryManager.Votes
-                    .FindByCondition(v => v.PollId == request.PollId && v.UserId == userId, trackChanges: false)
-                    .Select(v => v.OptionId)
-                    .ToListAsync(cancellationToken);
+                var userVotes = await _repositoryManager.Votes.GetUserVoteOptionIdsAsync(request.PollId, userId, false, cancellationToken);
 
                 if (userVotes.Any())
                 {

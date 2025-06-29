@@ -22,59 +22,31 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls
 
         public async Task<PagedResponse<PollDto>> Handle(GetAllPollsQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<Poll> pollsQueryable = _repositoryManager.Polls.FindAll(trackChanges: false);
-            pollsQueryable = pollsQueryable.Include(p => p.Tags);
+            var pagedPolls = await _repositoryManager.Polls.GetPollsAsync(request, false, cancellationToken);
 
-            if (!string.IsNullOrWhiteSpace(request.TitleSearch))
+            if (!pagedPolls.Any())
             {
-                pollsQueryable = pollsQueryable.Where(p => p.Title.Contains(request.TitleSearch));
-            }
-            if (request.CreatedAfter.HasValue)
-            {
-                pollsQueryable = pollsQueryable.Where(p => p.CreatedAt >= request.CreatedAfter.Value);
-            }
-            if (request.CreatedBefore.HasValue)
-            {
-                pollsQueryable = pollsQueryable.Where(p => p.CreatedAt < request.CreatedBefore.Value.Date.AddDays(1));
-            }
-            if (request.StartsAfter.HasValue)
-            {
-                pollsQueryable = pollsQueryable.Where(p => p.StartDate >= request.StartsAfter.Value);
-            }
-            if (request.EndsBefore.HasValue)
-            {
-                pollsQueryable = pollsQueryable.Where(p => p.EndDate < request.EndsBefore.Value.Date.AddDays(1));
-            }
-            if (request.IsActive.HasValue)
-            {
-                var now = DateTime.UtcNow;
-                if (request.IsActive.Value)
-                {
-                    pollsQueryable = pollsQueryable.Where(p => p.StartDate <= now && p.EndDate >= now);
-                }
-                else
-                {
-                    pollsQueryable = pollsQueryable.Where(p => p.StartDate > now || p.EndDate < now);
-                }
+                return new PagedResponse<PollDto>(new List<PollDto>(), pagedPolls.MetaData);
             }
 
-            pollsQueryable = pollsQueryable.OrderByDescending(p => p.CreatedAt);
+            var pollIds = pagedPolls.Select(p => p.Id).ToList();
 
-            var pagedPolls = await PagedList<Poll>.CreateAsync(
-                pollsQueryable,
-                request.PageNumber,
-                request.PageSize,
-                cancellationToken);
+            var allOptions = await _repositoryManager.Options.GetOptionsByPollIdsAsync(pollIds, false, cancellationToken);
+
+            var optionsByPollId = allOptions
+                .GroupBy(o => o.PollId)
+                .ToDictionary(g => g.Key, g => g.OrderBy(o => o.Order).ToList());
 
             var pollDtos = new List<PollDto>();
             foreach (var poll in pagedPolls)
             {
                 var pollDto = _mapper.Map<PollDto>(poll);
-                var options = await _repositoryManager.Options
-                                        .FindByCondition(o => o.PollId == poll.Id, trackChanges: false)
-                                        .OrderBy(o => o.Order)
-                                        .ToListAsync(cancellationToken);
-                pollDto.Options = _mapper.Map<List<OptionDto>>(options);
+
+                if (optionsByPollId.TryGetValue(poll.Id, out var pollOptions))
+                {
+                    pollDto.Options = _mapper.Map<List<OptionDto>>(pollOptions);
+                }
+
                 pollDtos.Add(pollDto);
             }
 

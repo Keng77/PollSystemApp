@@ -6,5 +6,6 @@ namespace PollSystemApp.Application.Common.Interfaces
     {
         Task<IEnumerable<PollResult>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges);
         Task<PollResult?> GetByIdAsync(Guid id, bool trackChanges);
+        Task<PollResult?> GetLatestPollResultAsync(Guid pollId, bool trackChanges, CancellationToken cancellationToken);
     }
 }

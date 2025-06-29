@@ -1,68 +1,55 @@
-using Microsoft.OpenApi.Models;
-using PollSystemApp.Api.Middleware;
+using PollSystemApp.Api;
 using PollSystemApp.Application;
 using PollSystemApp.Infrastructure;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.AddSwaggerGen(options =>
+try
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Poll System API", Version = "v1" });
+    var builder = WebApplication.CreateBuilder(args);
 
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token (Example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...')",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
+    // Конфигурация логирования 
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+       .ReadFrom.Configuration(context.Configuration)
+       .ReadFrom.Services(services)
+       .Enrich.FromLogContext());
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    // Регистрация сервисов по слоям 
+    builder.Services
+        .AddApiServices() 
+        .AddApplicationServices()
+        .AddInfrastructure(builder.Configuration);
+
+    var app = builder.Build();
+
+    // Конфигурация HTTP пайплайна 
+    app.UseSerilogRequestLogging();
+    app.UseExceptionHandler();
+
+    if (app.Environment.IsDevelopment())
     {
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
-});
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApplicationServices();
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Poll System API V1");
+        });
+    }
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.AddProblemDetails();
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseExceptionHandler();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Poll System API V1");
-    });
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly"); 
+}
+finally
+{
+    Log.CloseAndFlush();
+}

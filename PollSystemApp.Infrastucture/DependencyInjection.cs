@@ -7,10 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 using PollSystemApp.Application.Common.Interfaces;
 using PollSystemApp.Application.Common.Interfaces.Authentication;
 using PollSystemApp.Application.Common.Settings;
+using PollSystemApp.Application.Services;
 using PollSystemApp.Domain.Users;
 using PollSystemApp.Infrastructure.Authentication;
 using PollSystemApp.Infrastructure.Common.Persistence;
-using PollSystemApp.Infrastructure.Services;
 using System.Text;
 
 
@@ -30,9 +30,8 @@ namespace PollSystemApp.Infrastructure
               .AddJwtAuthentication(configuration);
 
             services.AddAuthorization();
-
-            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddScoped<IRepositoryManager, RepositoryManager>();
             services.AddSingleton<ITokenValidator, TokenValidator>();
 

@@ -482,7 +482,7 @@ namespace PollSystemApp.Infrastructure.Migrations
             modelBuilder.Entity("PollSystemApp.Domain.Polls.Option", b =>
                 {
                     b.HasOne("PollSystemApp.Domain.Polls.Poll", null)
-                        .WithMany()
+                        .WithMany("Options")
                         .HasForeignKey("PollId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -546,6 +546,11 @@ namespace PollSystemApp.Infrastructure.Migrations
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PollSystemApp.Domain.Polls.Poll", b =>
+                {
+                    b.Navigation("Options");
                 });
 
             modelBuilder.Entity("PollSystemApp.Domain.Polls.PollResult", b =>

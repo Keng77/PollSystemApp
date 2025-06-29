@@ -15,15 +15,10 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
             _dbSet = _db.Set<T>();
         }
 
-        public virtual IQueryable<T> FindAll(bool trackChanges = false) =>
-          trackChanges
-            ? _dbSet
-            : _dbSet.AsNoTracking();
-
-        public virtual IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false) =>
-          trackChanges
-            ? _dbSet.Where(expression)
-            : _dbSet.Where(expression).AsNoTracking();
+        protected IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false) =>
+      trackChanges
+        ? _dbSet.Where(expression)
+        : _dbSet.Where(expression).AsNoTracking();
 
         public virtual Task<T?> FindAsync(params object[] keyValues) =>
           _dbSet.FindAsync(keyValues).AsTask();
@@ -32,14 +27,14 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
           _dbSet.FindAsync(keyValues, cancellationToken);
 
         public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> expression, bool trackChanges = false, CancellationToken cancellationToken = default) =>
-          await FindByCondition(expression, trackChanges)
-                 .FirstOrDefaultAsync(cancellationToken);
+       await FindByCondition(expression, trackChanges)
+              .FirstOrDefaultAsync(cancellationToken);
 
         public virtual async Task<List<T>> ListAllAsync(bool trackChanges = false, CancellationToken cancellationToken = default) =>
-          await FindAll(trackChanges).ToListAsync(cancellationToken);
+            await (trackChanges ? _dbSet : _dbSet.AsNoTracking()).ToListAsync(cancellationToken);
 
         public virtual async Task<List<T>> ListAsync(Expression<Func<T, bool>> expression, bool trackChanges = false, CancellationToken cancellationToken = default) =>
-          await FindByCondition(expression, trackChanges).ToListAsync(cancellationToken);
+            await FindByCondition(expression, trackChanges).ToListAsync(cancellationToken);
 
         public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> expression, CancellationToken cancellationToken = default) =>
           await _dbSet.AnyAsync(expression, cancellationToken);
