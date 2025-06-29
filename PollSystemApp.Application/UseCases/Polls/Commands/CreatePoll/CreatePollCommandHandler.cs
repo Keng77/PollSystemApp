@@ -22,23 +22,39 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll
         public async Task<Guid> Handle(CreatePollCommand request, CancellationToken cancellationToken)
         {
             var userId = _currentUserService.UserId;
-
             if (!userId.HasValue)
             {
                 throw new ForbiddenAccessException("User is not authenticated or user ID could not be determined.");
             }
+            
+            if (request.Options == null || request.Options.Count < 2)
+            {
+                throw new BadRequestException("A poll must have at least two options.");
+            }
 
             var poll = _mapper.Map<Poll>(request);
+
             poll.Id = Guid.NewGuid();
             poll.CreatedAt = DateTime.UtcNow;
             poll.CreatedBy = userId.Value;
 
-            if (request.Tags != null && request.Tags.Count != 0)
+            foreach (var option in poll.Options)
             {
-                poll.Tags = [];
+                option.Id = Guid.NewGuid();
+            }
+
+            if (request.Tags != null && request.Tags.Any())
+            {
+                poll.Tags = new List<Tag>();
                 foreach (var tagName in request.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
                 {
-                    var existingTag = await _repositoryManager.Tags.FirstOrDefaultAsync(t => t.Name.Equals(tagName, StringComparison.CurrentCultureIgnoreCase), cancellationToken: cancellationToken);
+                    var normalizedTagName = tagName.ToLower();
+
+                    var existingTag = await _repositoryManager.Tags.FirstOrDefaultAsync(
+                        t => t.Name.ToLower() == normalizedTagName,
+                        trackChanges: true,
+                        cancellationToken: cancellationToken);
+
                     if (existingTag != null)
                     {
                         poll.Tags.Add(existingTag);
@@ -46,30 +62,14 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.CreatePoll
                     else
                     {
                         var newTag = new Tag { Id = Guid.NewGuid(), Name = tagName };
-                        _repositoryManager.Tags.Create(newTag);
                         poll.Tags.Add(newTag);
                     }
                 }
             }
 
             _repositoryManager.Polls.Create(poll);
-
-            if (request.Options != null && request.Options.Count != 0)
-            {
-                foreach (var optionDto in request.Options)
-                {
-                    var option = _mapper.Map<Option>(optionDto);
-                    option.Id = Guid.NewGuid();
-                    option.PollId = poll.Id;
-                    _repositoryManager.Options.Create(option);
-                }
-            }
-            else
-            {
-                throw new BadRequestException("A poll must have at least one option.");
-            }
-
             await _repositoryManager.CommitAsync(cancellationToken);
+
             return poll.Id;
         }
     }

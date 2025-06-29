@@ -58,6 +58,7 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Commands
         [Fact]
         public async Task Handle_ShouldCreatePollAndReturnPollId_WhenRequestIsValid()
         {
+            // Arrange
             var userId = Guid.NewGuid();
             var command = new CreatePollCommand
             {
@@ -73,33 +74,42 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Commands
             _tagRepositoryMock.Setup(r => r.FirstOrDefaultAsync(It.IsAny<Expression<Func<Tag, bool>>>(), false, It.IsAny<CancellationToken>()))
                               .ReturnsAsync((Tag)null);
 
+            // Act
             var resultPollId = await _handler.Handle(command, CancellationToken.None);
 
+            // Assert
             resultPollId.Should().NotBeEmpty();
 
             _pollRepositoryMock.Verify(r => r.Create(It.Is<Poll>(p =>
                 p.Id == resultPollId &&
                 p.CreatedBy == userId &&
-                p.Title == command.Title
+                p.Title == command.Title &&
+                p.Options.Count == 2
             )), Times.Once);
 
-            _optionRepositoryMock.Verify(r => r.Create(It.IsAny<Option>()), Times.Exactly(2));
-            _tagRepositoryMock.Verify(r => r.Create(It.IsAny<Tag>()), Times.Exactly(2));
+            _tagRepositoryMock.Verify(r => r.FirstOrDefaultAsync(It.IsAny<Expression<Func<Tag, bool>>>(), true,
+                It.IsAny<CancellationToken>()), Times.Exactly(2));
             _repositoryManagerMock.Verify(r => r.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public async Task Handle_ShouldThrowForbiddenAccessException_WhenUserIsNotAuthenticated()
         {
+            // Arrange
             var command = new CreatePollCommand { Title = "Test" };
             _currentUserServiceMock.Setup(s => s.UserId).Returns((Guid?)null);
+
+            // Act
             Func<Task> act = () => _handler.Handle(command, CancellationToken.None);
+
+            // Assert
             await act.Should().ThrowAsync<ForbiddenAccessException>();
         }
 
         [Fact]
         public async Task Handle_ShouldThrowBadRequestException_WhenNoOptionsAreProvided()
         {
+            // Arrange
             var userId = Guid.NewGuid();
             var command = new CreatePollCommand
             {
@@ -108,10 +118,12 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Commands
             };
             _currentUserServiceMock.Setup(s => s.UserId).Returns(userId);
 
+            // Act 
             Func<Task> act = () => _handler.Handle(command, CancellationToken.None);
 
+            // Assert
             await act.Should().ThrowAsync<BadRequestException>()
-                     .WithMessage("A poll must have at least one option.");
+                     .WithMessage("A poll must have at least two options.");
         }
     }
 }

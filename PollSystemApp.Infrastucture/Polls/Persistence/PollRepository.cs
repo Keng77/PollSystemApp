@@ -40,6 +40,12 @@ namespace PollSystemApp.Infrastructure.Polls.Persistence
             {
                 pollsQueryable = pollsQueryable.Where(p => p.Title.Contains(parameters.TitleSearch));
             }
+            if (!string.IsNullOrWhiteSpace(parameters.TagSearch))
+            {
+                var normalizedTagSearch = parameters.TagSearch.ToLower();
+                pollsQueryable = pollsQueryable.Where(p =>
+                    p.Tags.Any(t => t.Name.ToLower().Contains(normalizedTagSearch)));
+            }
             if (parameters.CreatedAfter.HasValue)
             {
                 pollsQueryable = pollsQueryable.Where(p => p.CreatedAt >= parameters.CreatedAfter.Value);

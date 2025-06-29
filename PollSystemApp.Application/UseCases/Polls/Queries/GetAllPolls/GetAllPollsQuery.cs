@@ -18,6 +18,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Queries.GetAllPolls
         }
 
         public string? TitleSearch { get; set; }
+        public string? TagSearch { get; set; }
         public DateTime? CreatedAfter { get; set; }
         public DateTime? CreatedBefore { get; set; }
         public DateTime? StartsAfter { get; set; }
