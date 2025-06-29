@@ -1,6 +1,4 @@
-using Microsoft.OpenApi.Models;
 using PollSystemApp.Api;
-using PollSystemApp.Api.Middleware;
 using PollSystemApp.Application;
 using PollSystemApp.Infrastructure;
 using Serilog;
