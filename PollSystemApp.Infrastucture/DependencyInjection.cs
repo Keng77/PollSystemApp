@@ -32,6 +32,8 @@ namespace PollSystemApp.Infrastructure
             services.AddAuthorization();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+            services.Configure<AdminSettings>(configuration.GetSection(AdminSettings.SectionName));
+            services.AddScoped<DataSeeder>();
             services.AddScoped<IRepositoryManager, RepositoryManager>();
             services.AddSingleton<ITokenValidator, TokenValidator>();
 
