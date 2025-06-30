@@ -57,7 +57,7 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Queries
 
             _pollRepositoryMock.Setup(r => r.GetByIdAsync(pollId, false)).ReturnsAsync(poll);
             _pollResultRepositoryMock.Setup(r => r.GetLatestPollResultAsync(pollId, false, It.IsAny<CancellationToken>()))
-                                     .ReturnsAsync((PollResult)null);
+                                     .ReturnsAsync((PollResult?)null);
             _resultsCalculatorMock.Setup(c => c.CalculateResultsAsync(poll, It.IsAny<CancellationToken>()))
                                   .ReturnsAsync(calculatedResult);
             _optionRepositoryMock.Setup(r => r.GetOptionsByPollIdAsync(pollId, false, It.IsAny<CancellationToken>()))

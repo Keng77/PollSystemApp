@@ -2,18 +2,16 @@
 using Microsoft.AspNetCore.Mvc;
 using PollSystemApp.Domain.Common.Exceptions;
 using System.Net;
+using System.Text.Json; 
 
 namespace PollSystemApp.Api.Middleware
 {
     public class GlobalExceptionHandler : IExceptionHandler
     {
         private readonly ILogger<GlobalExceptionHandler> _logger;
-        private readonly IProblemDetailsService _problemDetailsService;
-
-        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IProblemDetailsService problemDetailsService)
+        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
         {
             _logger = logger;
-            _problemDetailsService = problemDetailsService;
         }
 
         public async ValueTask<bool> TryHandleAsync(
@@ -21,17 +19,18 @@ namespace PollSystemApp.Api.Middleware
             Exception exception,
             CancellationToken cancellationToken)
         {
-            _logger.LogError(exception, "An unhandled exception occurred: {ErrorMessage}", exception.Message);
+            _logger.LogError(exception, "GlobalExceptionHandler caught an exception: {ErrorMessage}", exception.Message);
 
-            (int statusCode, string title, string? detail, IReadOnlyDictionary<string, string[]>? validationErrors) = exception switch
+            httpContext.Response.ContentType = "application/problem+json";
+
+            (int statusCode, string title) = exception switch
             {
-                NotFoundException ex => ((int)HttpStatusCode.NotFound, "Resource Not Found", ex.Message, null),
-                BadRequestException ex => ((int)HttpStatusCode.BadRequest, "Bad Request", ex.Message, null),
-                ValidationAppException ex => ((int)HttpStatusCode.UnprocessableEntity, "Validation Error", "One or more validation errors occurred.", ex.Errors),
-                ForbiddenAccessException ex => ((int)HttpStatusCode.Forbidden, "Forbidden", ex.Message, null),
-                _ => ((int)HttpStatusCode.InternalServerError, "Internal Server Error", "An unexpected error occurred. Please try again later.", null)
+                NotFoundException => ((int)HttpStatusCode.NotFound, "Resource Not Found"),
+                BadRequestException => ((int)HttpStatusCode.BadRequest, "Bad Request"),
+                ValidationAppException => ((int)HttpStatusCode.UnprocessableEntity, "Validation Error"),
+                ForbiddenAccessException => ((int)HttpStatusCode.Forbidden, "Forbidden Access"),
+                _ => ((int)HttpStatusCode.InternalServerError, "Internal Server Error")
             };
-
 
             httpContext.Response.StatusCode = statusCode;
 
@@ -39,7 +38,6 @@ namespace PollSystemApp.Api.Middleware
             {
                 Status = statusCode,
                 Title = title,
-                Detail = detail,
                 Type = exception.GetType().Name,
                 Instance = httpContext.Request.Path
             };
@@ -47,25 +45,19 @@ namespace PollSystemApp.Api.Middleware
             if (exception is ValidationAppException valEx)
             {
                 problemDetails.Extensions["errors"] = valEx.Errors;
-                problemDetails.Detail = "One or more validation errors occurred. See 'errors' property for details.";
-            }
-            else if (problemDetails.Status == (int)HttpStatusCode.InternalServerError && httpContext.RequestServices.GetService<IHostEnvironment>()?.IsDevelopment() == false)
-            {
-                problemDetails.Detail = "An unexpected error occurred. Please try again later.";
-                problemDetails.Title = "Internal Server Error";
+                problemDetails.Detail = "One or more validation errors occurred. See 'errors' for details.";
             }
             else
             {
-                problemDetails.Detail = exception.Message;
+                problemDetails.Detail = (statusCode == (int)HttpStatusCode.InternalServerError && !httpContext.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment())
+                    ? "An unexpected error occurred. Please try again later."
+                    : exception.Message;
             }
 
+            var jsonResponse = JsonSerializer.Serialize(problemDetails);
+            await httpContext.Response.WriteAsync(jsonResponse, cancellationToken);
 
-            return await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-            {
-                HttpContext = httpContext,
-                ProblemDetails = problemDetails,
-                Exception = exception
-            });
+            return true;
         }
     }
 }

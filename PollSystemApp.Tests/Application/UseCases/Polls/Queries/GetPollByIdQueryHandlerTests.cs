@@ -81,7 +81,7 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Queries
             var query = new GetPollByIdQuery { Id = pollId };
 
             _pollRepositoryMock.Setup(r => r.GetPollWithDetailsAsync(It.IsAny<Guid>(), false, It.IsAny<CancellationToken>()))
-                               .ReturnsAsync((Poll)null);
+                               .ReturnsAsync((Poll?)null);
 
             // Act
             Func<Task> act = () => _handler.Handle(query, CancellationToken.None);

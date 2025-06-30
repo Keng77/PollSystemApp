@@ -63,8 +63,8 @@ namespace PollSystemApp.Tests.Application.UseCases.Auth.Commands
         {
             // Arrange
             var command = new LoginUserCommand { UserNameOrEmail = "testuser", Password = "WrongPassword" };
-            _userRepositoryMock.Setup(r => r.GetByUserNameAsync(command.UserNameOrEmail)).ReturnsAsync((User)null);
-            _userRepositoryMock.Setup(r => r.GetByEmailAsync(command.UserNameOrEmail)).ReturnsAsync((User)null);
+            _userRepositoryMock.Setup(r => r.GetByUserNameAsync(command.UserNameOrEmail)).ReturnsAsync((User?)null);
+            _userRepositoryMock.Setup(r => r.GetByEmailAsync(command.UserNameOrEmail)).ReturnsAsync((User?)null);
 
             // Act
             Func<Task> act = () => _handler.Handle(command, CancellationToken.None);

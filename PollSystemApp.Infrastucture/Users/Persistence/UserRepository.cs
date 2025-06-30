@@ -31,6 +31,9 @@ namespace PollSystemApp.Infrastructure.Users.Persistence
         public async Task<bool> CheckPasswordAsync(User user, string password) =>
           await _userManager.CheckPasswordAsync(user, password);
 
+        public async Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword) =>
+          await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+
     }
 
 }

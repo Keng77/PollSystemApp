@@ -16,6 +16,7 @@ namespace PollSystemApp.Application.Common.Interfaces
         Task<IdentityResult> DeleteAsync(User user);
 
         Task<bool> CheckPasswordAsync(User user, string password);
+        Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
 
     }
 }
