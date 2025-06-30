@@ -21,11 +21,8 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption
 
         public async Task<Unit> Handle(UpdatePollOptionCommand request, CancellationToken cancellationToken)
         {
-            var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, trackChanges: false);
-            if (poll == null)
-            {
-                throw new NotFoundException(nameof(Poll), request.PollId);
-            }
+            var poll = await _repositoryManager.Polls.GetByIdAsync(request.PollId, false)
+             ?? throw new NotFoundException(nameof(Poll), request.PollId);
 
             var currentUserId = _currentUserService.UserId;
             if (poll.CreatedBy != currentUserId && !_currentUserService.IsInRole("Admin"))
@@ -34,15 +31,25 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.UpdatePollOption
             }
 
             var option = await _repositoryManager.Options.FirstOrDefaultAsync(
-                o => o.Id == request.OptionId && o.PollId == request.PollId,
-                trackChanges: true);
+            o => o.Id == request.OptionId && o.PollId == request.PollId,
+            trackChanges: true)
+            ?? throw new NotFoundException(nameof(Option), request.OptionId);
 
-            if (option == null)
+            if (option.Order != request.OptionData.Order)
             {
-                throw new NotFoundException(nameof(Option), request.OptionId);
-            }
-            _mapper.Map(request.OptionData, option);
+                bool orderExists = await _repositoryManager.Options.ExistsAsync(
+                    o => o.PollId == request.PollId &&
+                         o.Order == request.OptionData.Order &&
+                         o.Id != request.OptionId,
+                    cancellationToken);
 
+                if (orderExists)
+                {
+                    throw new BadRequestException($"An option with order '{request.OptionData.Order}' already exists in this poll.");
+                }
+            }
+
+            _mapper.Map(request.OptionData, option);
             await _repositoryManager.CommitAsync(cancellationToken);
 
             return Unit.Value;

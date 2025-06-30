@@ -39,10 +39,21 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.AddOptionToPoll
             option.Id = Guid.NewGuid();
             option.PollId = request.PollId;
 
-            if (request.OptionData.Order <= 0)
+            if (request.OptionData.Order > 0)
+            {
+                bool orderExists = await _repositoryManager.Options.ExistsAsync(
+                    o => o.PollId == request.PollId && o.Order == request.OptionData.Order,
+                    cancellationToken);
+
+                if (orderExists)
+                {
+                    throw new BadRequestException($"An option with order '{request.OptionData.Order}' already exists in this poll.");
+                }
+            }
+            else 
             {
                 var lastOption = await _repositoryManager.Options.GetLastOptionByPollIdAsync(request.PollId, false, cancellationToken);
-                option.Order = (lastOption?.Order ?? -1) + 1;
+                option.Order = (lastOption?.Order ?? 0) + 1; 
             }
 
             _repositoryManager.Options.Create(option);
