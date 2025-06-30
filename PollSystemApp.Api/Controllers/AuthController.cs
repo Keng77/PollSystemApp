@@ -1,6 +1,8 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PollSystemApp.Application.Common.Dto.UserDtos;
+using PollSystemApp.Application.UseCases.Auth.Commands.ChangePassword;
 using PollSystemApp.Application.UseCases.Auth.Commands.LoginUser;
 using PollSystemApp.Application.UseCases.Auth.Commands.RefreshToken;
 using PollSystemApp.Application.UseCases.Auth.Commands.RegisterUser;
@@ -35,6 +37,18 @@ public class AuthController : ControllerBase
     {
         var authResponse = await _mediator.Send(command, cancellationToken);
         return Ok(authResponse);
+    }
+
+    [HttpPost("change-password")]
+    [Authorize] 
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(command, cancellationToken);
+        return NoContent();
     }
 
     [HttpPost("refresh-token")]
