@@ -87,10 +87,11 @@ API предоставляет полный набор эндпоинтов дл
 ```bash
 git clone https://github.com/Keng77/PollSystemApp.git
 cd PollSystemApp
+```
 ### 3. Настройка базы данных
 
 Откройте файл `appsettings.json` в проекте `PollSystemApp.Api` и измените строку подключения `DefaultConnection` под вашу конфигурацию SQL Server.
-
+```bash
 "ConnectionStrings": {
   "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=PollSystemDb;Integrated Security=true;Trusted_Connection=True;TrustServerCertificate=True;"
 }
@@ -98,23 +99,33 @@ cd PollSystemApp
 
 ### 4. Настройка секретов
 
-Проект использует `user-secrets` для хранения чувствительных данных (JWT-ключ).
+Проект использует `user-secrets` для хранения чувствительных данных, таких как JWT-ключ и учетные данные администратора по умолчанию.
 
 Откройте терминал в корневой папке проекта (`PollSystemApp.Api`) и выполните следующие команды:
 
-**Инициализация user-secrets:**
+**1. Инициализация user-secrets:**
 ```bash
 dotnet user-secrets init --project ./PollSystemApp.Api
 ```
 
-**Добавление секретов для JWT:**
-```bash
-dotnet user-secrets set "JwtSettings:Secret" "YOUR_SUPER_SECRET_KEY_THAT_IS_LONG_AND_COMPLEX"
-dotnet user-secrets set "JwtSettings:Issuer" "PollSystemApp.Api"
-dotnet user-secrets set "JwtSettings:Audience" "PollSystemApp.ApiClient"
-dotnet user-secrets set "JwtSettings:ExpiryMinutes" 60
-```
-> **Важно:** Замените `"YOUR_SUPER_SECRET_KEY..."` на свою собственную длинную и сложную строку для обеспечения безопасности.
+**2. Добавление секретов:**
+
+*   **Настройка JWT**
+    ```bash
+    dotnet user-secrets set "JwtSettings:Secret" "YOUR_SUPER_SECRET_KEY_THAT_IS_LONG_AND_COMPLEX"
+    dotnet user-secrets set "JwtSettings:Issuer" "PollSystemApp.Api"
+    dotnet user-secrets set "JwtSettings:Audience" "PollSystemApp.ApiClient"
+    dotnet user-secrets set "JwtSettings:ExpiryMinutes" 60
+    ```
+    > **Важно:** Замените `"YOUR_SUPER_SECRET_KEY..."` на свою собственную длинную и сложную строку для обеспечения безопасности.
+
+*   **Настройка учетной записи администратора** *(Опционально. Требуется, если в приложении реализована логика сидинга/начального создания администратора)*
+    ```bash
+    dotnet user-secrets set "AdminCredentials:UserName" "admin"
+    dotnet user-secrets set "AdminCredentials:Email" "admin@pollsystem.com"
+    dotnet user-secrets set "AdminCredentials:Password" "YourSecurePassword123!"
+    ```
+    > Пароль должен соответствовать требованиям безопасности (минимум 8 символов, заглавные и строчные буквы, цифры, спецсимволы).
 
 ### 5. Применение миграций
 
