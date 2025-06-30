@@ -91,7 +91,6 @@ cd PollSystemApp
 
 Откройте файл `appsettings.json` в проекте `PollSystemApp.Api` и измените строку подключения `DefaultConnection` под вашу конфигурацию SQL Server.
 
-```json
 "ConnectionStrings": {
   "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=PollSystemDb;Integrated Security=true;Trusted_Connection=True;TrustServerCertificate=True;"
 }
