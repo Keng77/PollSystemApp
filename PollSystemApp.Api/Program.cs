@@ -1,6 +1,7 @@
 using PollSystemApp.Api;
 using PollSystemApp.Application;
 using PollSystemApp.Infrastructure;
+using PollSystemApp.Infrastructure.Common.Persistence;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -31,6 +32,7 @@ try
 
     if (app.Environment.IsDevelopment())
     {
+        await app.SeedDatabaseAsync();
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
