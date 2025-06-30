@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics;
 using PollSystemApp.Api;
 using PollSystemApp.Application;
 using PollSystemApp.Infrastructure;
@@ -26,20 +27,21 @@ try
 
     var app = builder.Build();
 
-    // Конфигурация HTTP пайплайна 
-    app.UseSerilogRequestLogging();
+    // Конфигурация пайплайна 
     app.UseExceptionHandler();
+    app.UseSerilogRequestLogging();
 
     if (app.Environment.IsDevelopment())
     {
-        await app.SeedDatabaseAsync();
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "Poll System API V1");
         });
+        await app.SeedDatabaseAsync();
     }
 
+    // Конфигурация пайплайна 
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();
