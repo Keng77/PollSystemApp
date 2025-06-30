@@ -88,7 +88,7 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Commands
             _currentUserServiceMock.Setup(s => s.UserId).Returns(userId);
             _pollRepositoryMock.Setup(r => r.GetByIdAsync(pollId, false)).ReturnsAsync(poll);
             _optionRepositoryMock.Setup(r => r.FirstOrDefaultAsync(It.IsAny<Expression<Func<Option, bool>>>(), true, It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync((Option)null);
+                                 .ReturnsAsync((Option?)null);
 
             // Act
             Func<Task> act = () => _handler.Handle(command, CancellationToken.None);

@@ -72,7 +72,7 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Commands
             };
             _currentUserServiceMock.Setup(s => s.UserId).Returns(userId); 
             _tagRepositoryMock.Setup(r => r.FirstOrDefaultAsync(It.IsAny<Expression<Func<Tag, bool>>>(), false, It.IsAny<CancellationToken>()))
-                              .ReturnsAsync((Tag)null);
+                              .ReturnsAsync((Tag?)null);
 
             // Act
             var resultPollId = await _handler.Handle(command, CancellationToken.None);
