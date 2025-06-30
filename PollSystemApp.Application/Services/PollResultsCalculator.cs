@@ -34,11 +34,11 @@ namespace PollSystemApp.Application.Services
             var votes = await _repositoryManager.Votes.GetVotesByPollIdAsync(poll.Id, false, cancellationToken);
 
             int totalVotesInPoll;
-            if (poll.IsAnonymous)
+            if (poll.IsMultipleChoice || poll.IsAnonymous)
             {
                 totalVotesInPoll = votes.Count;
             }
-            else
+            else 
             {
                 totalVotesInPoll = votes.GroupBy(v => v.UserId)
                                         .Count(g => g.Key.HasValue && g.Key.Value != Guid.Empty);

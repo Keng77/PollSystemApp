@@ -90,7 +90,7 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Queries
             _pollRepositoryMock.Setup(r => r.ExistsAsync(p => p.Id == pollId, It.IsAny<CancellationToken>()))
                                .ReturnsAsync(true);
             _optionRepositoryMock.Setup(r => r.FirstOrDefaultAsync(It.IsAny<Expression<Func<Option, bool>>>(), false, It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync((Option)null);
+                                 .ReturnsAsync((Option?)null);
 
             // Act
             Func<Task> act = () => _handler.Handle(query, CancellationToken.None);

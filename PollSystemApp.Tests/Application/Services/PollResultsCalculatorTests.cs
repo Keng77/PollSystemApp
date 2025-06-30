@@ -112,11 +112,11 @@ namespace PollSystemApp.Tests.Application.Services
             result.TotalVotes.Should().Be(4); 
 
             var option1Result = result.Options.FirstOrDefault(o => o.OptionId == option1Id);
-            option1Result.Votes.Should().Be(3);
+            option1Result!.Votes.Should().Be(3);
             option1Result.Percentage.Should().Be(75.00);
 
             var option2Result = result.Options.FirstOrDefault(o => o.OptionId == option2Id);
-            option2Result.Votes.Should().Be(1);
+            option2Result!.Votes.Should().Be(1);
             option2Result.Percentage.Should().Be(25.00);
         }
     }

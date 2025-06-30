@@ -89,7 +89,7 @@ namespace PollSystemApp.Tests.Application.UseCases.Polls.Commands
             var pollId = Guid.NewGuid();
             var command = new UpdatePollCommand { Id = pollId, PollData = new PollForUpdateDto() };
 
-            _pollRepositoryMock.Setup(r => r.GetByIdAsync(pollId, true)).ReturnsAsync((Poll)null);
+            _pollRepositoryMock.Setup(r => r.GetByIdAsync(pollId, true)).ReturnsAsync((Poll?)null);
 
             // Act
             Func<Task> act = () => _handler.Handle(command, CancellationToken.None);
