@@ -2,6 +2,7 @@
 using PollSystemApp.Application.Common.Interfaces;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
+using PollSystemApp.Domain.Users;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.EndPollEarly
 {
@@ -18,7 +19,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.EndPollEarly
 
         public async Task<Unit> Handle(EndPollEarlyCommand request, CancellationToken cancellationToken)
         {
-            if (!_currentUserService.IsInRole("Admin"))
+            if (!_currentUserService.IsInRole(UserRoles.Admin))
             {
                 throw new ForbiddenAccessException("Only administrators can end a poll early.");
             }
