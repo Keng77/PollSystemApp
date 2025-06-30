@@ -2,6 +2,7 @@
 using PollSystemApp.Application.Common.Interfaces;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
+using PollSystemApp.Domain.Users;
 
 namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePoll
 {
@@ -26,7 +27,7 @@ namespace PollSystemApp.Application.UseCases.Polls.Commands.DeletePoll
             }
 
             var currentUserId = _currentUserService.UserId;
-            if (poll.CreatedBy != currentUserId && !_currentUserService.IsInRole("Admin"))
+            if (poll.CreatedBy != currentUserId && !_currentUserService.IsInRole(UserRoles.Admin))
             {
                 throw new ForbiddenAccessException("You are not authorized to delete this poll.");
             }

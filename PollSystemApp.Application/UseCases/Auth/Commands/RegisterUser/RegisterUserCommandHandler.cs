@@ -34,11 +34,8 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, U
             throw new ValidationAppException(errorsDictionary);
         }
 
-        var roleResult = await _repositoryManager.Users.AddRolesToUserAsync(user, new List<string> { "User" });
-        if (!roleResult.Succeeded)
-        {
-        }
-
+        var roleResult = await _repositoryManager.Users.AddRolesToUserAsync(user, new List<string> { UserRoles.User });
+       
         return Unit.Value;
     }
 }

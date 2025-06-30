@@ -19,6 +19,7 @@ using PollSystemApp.Application.UseCases.Polls.Queries.GetPollOptionById;
 using PollSystemApp.Application.UseCases.Polls.Queries.GetPollResults;
 using PollSystemApp.Application.UseCases.Votes.Commands.CreateVote;
 using PollSystemApp.Application.UseCases.Votes.Queries.CheckUserVote;
+using PollSystemApp.Domain.Users;
 using System.Text.Json;
 
 namespace PollSystemApp.Api.Controllers;
@@ -37,7 +38,7 @@ public class PollsController : ControllerBase
 
     // Polls
     [HttpPost]
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.User}")]
     [ProducesResponseType(typeof(PollDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -74,7 +75,7 @@ public class PollsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.User}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -89,7 +90,7 @@ public class PollsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.User}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -104,7 +105,7 @@ public class PollsController : ControllerBase
 
     // Options 
     [HttpPost("{pollId:guid}/options")]
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.User}")]
     [ProducesResponseType(typeof(OptionDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -130,7 +131,7 @@ public class PollsController : ControllerBase
     }
 
     [HttpPut("{pollId:guid}/options/{optionId:guid}")]
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.User}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -145,7 +146,7 @@ public class PollsController : ControllerBase
     }
 
     [HttpDelete("{pollId:guid}/options/{optionId:guid}")]
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.User}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -186,7 +187,7 @@ public class PollsController : ControllerBase
 
     // Poll Management / Results
     [HttpPost("{pollId:guid}/end-early")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = $"{UserRoles.Admin}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]

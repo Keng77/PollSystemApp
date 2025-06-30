@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using PollSystemApp.Domain.Users;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,8 +22,8 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
 
         public async Task SeedRolesAndAdminAsync(AdminSettings adminSettings)
         {
-            await SeedRoleAsync("Admin");
-            await SeedRoleAsync("User");
+            await SeedRoleAsync(UserRoles.Admin);
+            await SeedRoleAsync(UserRoles.User);
             await SeedAdminUserAsync(adminSettings);
         }
 
@@ -37,7 +38,8 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
 
         private async Task SeedAdminUserAsync(AdminSettings adminSettings)
         {
-            if (await _userManager.FindByEmailAsync(adminSettings.Email) == null)
+            var existingAdmin = await _userManager.FindByEmailAsync(adminSettings.Email);
+            if (existingAdmin == null)
             {
                 var adminUser = new User
                 {
@@ -52,8 +54,8 @@ namespace PollSystemApp.Infrastructure.Common.Persistence
 
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(adminUser, "Admin");
-                    _logger.LogInformation("Admin user '{UserName}' created successfully and assigned 'Admin' role.", adminSettings.UserName);
+                    await _userManager.AddToRoleAsync(adminUser, UserRoles.Admin);
+                    _logger.LogInformation("Admin user '{UserName}' created successfully and assigned '{AdminRole}' role.", adminSettings.UserName, UserRoles.Admin);
                 }
                 else
                 {
