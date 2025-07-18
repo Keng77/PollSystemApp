@@ -221,10 +221,6 @@ public class PollsController : ControllerBase
     {
         var query = new ExportPollResultsToCsvQuery { PollId = pollId };
         var exportData = await _mediator.Send(query, cancellationToken);
-        if (exportData.FileContents == null || exportData.FileContents.Length == 0)
-        {
-            return NotFound(new ProblemDetails { Title = "No data to export or error generating CSV.", Status = StatusCodes.Status404NotFound });
-        }
         return File(exportData.FileContents, exportData.ContentType, exportData.FileName);
     }
 }
