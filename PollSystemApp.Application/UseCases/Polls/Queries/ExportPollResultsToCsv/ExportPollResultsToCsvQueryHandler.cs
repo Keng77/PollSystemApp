@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using PollSystemApp.Application.Common.Interfaces;
 using PollSystemApp.Domain.Common.Exceptions;
 using PollSystemApp.Domain.Polls;
@@ -71,6 +72,11 @@ public class ExportPollResultsToCsvQueryHandler : IRequestHandler<ExportPollResu
         string safeTitle = new string(poll.Title.Where(c => !Path.GetInvalidFileNameChars().Contains(c)).ToArray()).Replace(" ", "_");
         if (string.IsNullOrWhiteSpace(safeTitle)) safeTitle = "PollResults";
         string fileName = $"{safeTitle}_{poll.Id.ToString("N").Substring(0, 8)}_{DateTime.UtcNow:yyyyMMdd}.csv";
+
+        if (csvBytes == null || csvBytes.Length == 0)
+        {
+            throw new NotFoundException("No data to export or error generating CSV.");
+        }
 
         return new PollResultsCsvExportDto
         {
